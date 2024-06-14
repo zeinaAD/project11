@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project1/models/designRings.dart';
 import 'package:project1/models/product.dart';
+import 'package:project1/screens/NewArrivals.dart';
+import 'package:project1/screens/bestSellers.dart';
 import 'package:project1/screens/cart.dart';
 import 'package:project1/screens/design_ring.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/profile.dart';
+import 'package:project1/screens/ring_page.dart';
 import 'package:project1/screens/suitable_diamond.dart';
+import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:project1/widgets/D_appbar.dart';
 import 'package:project1/widgets/diamondCategories.dart';
@@ -24,12 +28,11 @@ class DiamondScreen extends StatefulWidget {
 
 class _DiamondScreenState extends State<DiamondScreen>
     with TickerProviderStateMixin {
+  late Future<List<Product>> futureBest;
   List<String> assets = [
     'images/na2.jpeg',
     'images/bs.jpeg',
-    'images/dis.jpeg',
-    //'images/gold1.jpg',
-    // 'images/gold1.jpg'
+    // 'images/dis.jpeg',
   ];
   final color = [
     Color(0xA5FFFFFF),
@@ -55,9 +58,17 @@ class _DiamondScreenState extends State<DiamondScreen>
           break;
         case 1:
           // Handle shopping cart icon tap
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DiamondScreen()),
+          );
           break;
         case 2:
           // Handle favorite icon tap
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => wishlist()),
+          );
           break;
         case 3:
           Navigator.push(
@@ -69,6 +80,39 @@ class _DiamondScreenState extends State<DiamondScreen>
           break;
       }
     });
+  }
+
+  void _onImageTap(int index) {
+    switch (index) {
+      case 0: //new arrivals
+        futureBest = Product.fetchNewArrivals();
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => RingPage(
+                    category: 'new',
+                    title: '        New Arrivals    ',
+                  )),
+        );
+        break;
+      case 1: //best sellers
+        // futureBest = Product.fetchBestSellers();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => RingPage(
+                    category: 'best',
+                    title: '        Best Sellers    ',
+                  )),
+        );
+        break;
+      // case 2: //discounts
+
+      //   break;
+      default:
+        break;
+    }
   }
 
   @override
@@ -158,16 +202,19 @@ class _DiamondScreenState extends State<DiamondScreen>
                     setState(() {});
                   },
                   itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.all(8),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                          //  color: color[index],
-                          borderRadius: BorderRadius.circular(25)),
-                      child: Image.asset(
-                        assets[index],
-                        fit: BoxFit.cover,
-                      ),
+                    return InkWell(
+                      onTap: () => _onImageTap(index),
+                      child: Container(
+                          margin: const EdgeInsets.all(8),
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            //   border: Border.all(color: kourcolor1, width: 4),
+                          ),
+                          child: Image.asset(
+                            assets[index],
+                            fit: BoxFit.cover,
+                          )),
                     );
                   },
                 ),
@@ -248,40 +295,40 @@ class _DiamondScreenState extends State<DiamondScreen>
                   ),
                 ),
               ),
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Special For You",
-                            style: TextStyle(
-                              color: kourcolor1,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              "See all",
-                              style: TextStyle(
-                                color: kourcolor1,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           Container(
+              //             child: Text(
+              //               "Special For You",
+              //               style: TextStyle(
+              //                 color: kourcolor1,
+              //                 fontSize: 24,
+              //                 fontWeight: FontWeight.bold,
+              //               ),
+              //             ),
+              //           ),
+              //           Container(
+              //             child: TextButton(
+              //               onPressed: () {},
+              //               child: const Text(
+              //                 "See all",
+              //                 style: TextStyle(
+              //                   color: kourcolor1,
+              //                   fontSize: 15,
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ],
+              //   ),
+              // ),
               SizedBox(
                 height: 15,
               ),

@@ -7,7 +7,7 @@ const Item = require('./models/item');
 
 async function handleItemsStoring(req, res) {
     console.log('********* Request body:', req.body);
-    const { name, category, image,price , quantity  , description ,date} = req.body;
+    const { name, category, image,price , quantity  , description } = req.body;
   
     try {
       // Create a new student document
@@ -18,7 +18,7 @@ async function handleItemsStoring(req, res) {
         price , 
         quantity  , 
         description,
-        date
+       // date
       });
   
       // Save the student document to the database

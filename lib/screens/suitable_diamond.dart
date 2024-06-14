@@ -7,9 +7,12 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project1/screens/bestSellers.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:lottie/lottie.dart';
+import 'package:project1/widgets/ImageDrawPage.dart';
+import 'package:project1/widgets/UserPreferences.dart';
 import 'package:project1/widgets/background-image.dart';
 import 'package:project1/widgets/handdetection.dart';
 
@@ -279,6 +282,10 @@ class _SuitableDiamondState extends State<SuitableDiamond>
                 SizedBox(height: 30),
                 GestureDetector(
                   onTap: () => uploadimage(context),
+                  // onTap: () => Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => ImageDrawPage()),
+                  // ),
                   child: Container(
                     child: Text(
                         'DONT KNOW YOUR FINGER SIZE? \n              LETS HELP YOU!',
@@ -310,45 +317,21 @@ class _SuitableDiamondState extends State<SuitableDiamond>
 
     if (result > 4.5) {
       ///tall and thin
-      // Image.asset(
-      //   'images/oval.jpeg', // oval
-      //   width: 80,
-      //   height: 80,
-      //   fit: BoxFit.cover,
-      // );
       imagePath = 'images/oval.jpeg';
     } else if (4.5 >= result && result > 4) {
       //short and thin
-      // Image.asset(
-      //   'images/Marquise.jpeg',
-      //   width: 80,
-      //   height: 80,
-      //   fit: BoxFit.cover,
-      // );
       imagePath = 'images/Marquise.jpeg';
       //Marquise Cut
     } else if (result > 3.5 && result < 4) {
       // tall and chuppy
-      // Image.asset(
-      //   'images/emerald.jpeg',
-      //   width: 80,
-      //   height: 80,
-      //   fit: BoxFit.cover,
-      // );
       imagePath = 'images/emerald.jpeg';
       // emerald
     } else if (result < 3.5) {
       // short and chubby
-      // Image.asset(
-      //   'images/pear.jpeg',
-      //   width: 80,
-      //   height: 80,
-      //   fit: BoxFit.cover,
-      // );
       imagePath = 'images/pear.jpeg';
       //pear-shaped diamond.
     } else {
-      //please provide a clear image
+      //please provide a more clear  image
     }
 
     setState(() {
@@ -431,6 +414,7 @@ class _SuitableDiamondState extends State<SuitableDiamond>
 
       setState(() {
         imageUrl = downloadURL;
+        UserPreferences.setimageUrl(imageUrl);
       });
     } catch (e) {
       print('Error uploading image: $e');
@@ -580,7 +564,13 @@ class _SuitableDiamondState extends State<SuitableDiamond>
                   width: 150,
                   child: ElevatedButton(
                     onPressed: () async {
-                      showImageDialog(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImageDrawPage()),
+                      );
+
+                      //showImageDialog(context);
                       // String result = await HandDetectionChannel.detectHand(
                       //     imageUrl); ////////////////////////
                     },

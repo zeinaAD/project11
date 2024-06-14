@@ -5,14 +5,14 @@ import 'package:project1/screens/chat.dart';
 import 'package:project1/screens/gold_page.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/login1.dart';
+import 'package:project1/screens/notification.dart';
 import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
 
 class NavigationDrawerWidget extends StatefulWidget {
   // final Product product;
-  // const NavigationDrawerWidget({Key? key, required this.product})
-  //     : super(key: key);
   const NavigationDrawerWidget({Key? key}) : super(key: key);
+  // const NavigationDrawerWidget({Key? key}) : super(key: key);
   @override
   State<NavigationDrawerWidget> createState() => _NavigationDrawerWidgetState();
 }
@@ -195,9 +195,9 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         ));
         break;
       case 1:
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => wishlist(product: widget.product),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => wishlist(),
+        ));
         break;
       case 2:
         Navigator.of(context).push(MaterialPageRoute(
@@ -206,7 +206,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 3:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => GoldScreen(), /////////gemstones
+          builder: (context) => Gemstone(), /////////gemstones
         ));
         break;
       case 4:
@@ -216,7 +216,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 5:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => GoldScreen(),
+          builder: (context) => notification(),
         ));
         break;
       case 6:

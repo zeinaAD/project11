@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project1/ipaddress.dart';
+import 'package:project1/screens/cart.dart';
 import 'package:project1/screens/payment_info.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:project1/widgets/UserPreferences.dart';
+import 'package:project1/models/ShippingInfo.dart';
 
 class ShippingInformationPage extends StatefulWidget {
+   final List<CartItem> cartItems;
+  const ShippingInformationPage({
+    super.key,
+    required this.cartItems,
+  });
   @override
   State<ShippingInformationPage> createState() =>
       _ShippingInformationPageState();
@@ -20,6 +27,7 @@ class _ShippingInformationPageState extends State<ShippingInformationPage> {
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _zipController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  // ignore: prefer_typing_uninitialized_variables
 
   @override
   Widget build(BuildContext context) {
@@ -102,20 +110,24 @@ class _ShippingInformationPageState extends State<ShippingInformationPage> {
             ElevatedButton(
               onPressed: () async {
                 print(UserPreferences.getUserID());
-                await shippingStoring(
+                final shippingInfo = ShippingInfo(
                   name: _nameController.text,
                   address: _addressController.text,
                   city: _cityController.text,
                   state: _stateController.text,
                   zipCode: _zipController.text,
                   phoneNumber: _phoneController.text,
+                );
+                await shippingStoring(
+                  info: shippingInfo,
                   // date: " ",
                 );
                 if (_formKey.currentState!.validate()) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PaymentInformationPage(),
+                      builder: (context) =>
+                          PaymentInformationPage(shipping: shippingInfo, cartItems: widget.cartItems),
                     ),
                   );
                 }
@@ -135,15 +147,9 @@ class _ShippingInformationPageState extends State<ShippingInformationPage> {
     );
   }
 
-  Future<void> shippingStoring({
-    required String name,
-    required String address,
-    required String city,
-    required String state,
-    required String zipCode,
-    required String phoneNumber,
-    // required String date,
-  }) async {
+  Future<void> shippingStoring({required ShippingInfo info
+      // required String date,
+      }) async {
     final ipAddress = await getLocalIPv4Address();
     final url = Uri.parse('http://$ipAddress:5000/shippingStoring');
     String? email = UserPreferences.getEmail();
@@ -163,11 +169,11 @@ class _ShippingInformationPageState extends State<ShippingInformationPage> {
         body: {
           'user_id': UserPreferences.getUserID(),
           'name': UserPreferences.getUserName(),
-          'address': address,
-          'city': city,
-          'state': state,
-          'zipCode': zipCode,
-          'phoneNumber': phoneNumber,
+          'address': info.address,
+          'city': info.city,
+          'state': info.state,
+          'zipCode': info.zipCode,
+          'phoneNumber': info.phoneNumber,
           'created_at': date,
           'updated_at': date
         },
@@ -176,11 +182,11 @@ class _ShippingInformationPageState extends State<ShippingInformationPage> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Data sent successfully
         print('successful shipping storing ');
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentInformationPage()), //payment info
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //       builder: (context) => PaymentInformationPage(shipping: shipping,)), //payment info
+        // );
       } else {
         print('HTTP error: ${response.statusCode}');
       }

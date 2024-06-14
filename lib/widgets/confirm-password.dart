@@ -8,7 +8,7 @@ class ConfirmPassword extends StatefulWidget {
     required this.hint,
     required this.inputType,
     required this.inputAction,
-    required this.controller,
+    required this.controller, String? validator,
   });
 
   final IconData icon;

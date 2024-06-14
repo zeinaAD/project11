@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:project1/main.dart';
+import 'package:project1/screens/add_review.dart';
 import 'package:project1/screens/cart.dart';
+import 'package:project1/screens/diamond_page.dart';
+import 'package:project1/screens/editprofile.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/shipping_info.dart';
 import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
+import 'package:project1/widgets/UserPreferences.dart';
 import 'package:project1/widgets/navigation_drawer_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:project1/widgets/UserPreferences.dart';
 
 class profile extends StatefulWidget {
-  // final TextEditingController emailController;
-
   const profile({super.key});
 
   @override
@@ -19,18 +20,11 @@ class profile extends StatefulWidget {
 }
 
 class _profileState extends State<profile> {
-  int selectedIndex = 0;
-  String? name;
-  // getUserData();
-  void initState() {
-    super.initState();
-    // getUserData();
-  }
+  int _selectedIndex = 0;
 
   void _navigateBottomBar(int index) {
     setState(() {
-      //  getUserData();
-      selectedIndex = index;
+      _selectedIndex = index;
       switch (index) {
         case 0:
           Navigator.push(
@@ -40,18 +34,23 @@ class _profileState extends State<profile> {
           break;
         case 1:
           // Handle shopping cart icon tap
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DiamondScreen()),
+          );
           break;
         case 2:
-          /* Navigator.push(
+          // Handle favorite icon tap
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => wishlist()),
-          ); */
+          );
           break;
         case 3:
-          /* Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => profile()),
-          ); */
+          );
           break;
         default:
           break;
@@ -61,12 +60,9 @@ class _profileState extends State<profile> {
 
   @override
   Widget build(BuildContext context) {
-    // final email = widget.emailController.text;
-    // final emailProvider = Provider.of<EmailProvider>(context);
-    // final email = emailProvider.email;
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
+        currentIndex: _selectedIndex,
         onTap: _navigateBottomBar,
         type: BottomNavigationBarType.fixed,
         items: [
@@ -82,7 +78,6 @@ class _profileState extends State<profile> {
               label: 'Account'),
         ],
       ),
-      //  drawer: NavigationDrawerWidget(),
       appBar: AppBar(
           title: Text(
             'My Account',
@@ -110,19 +105,16 @@ class _profileState extends State<profile> {
             ),
           ]),
       body: Container(
-        // padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Container(
               width: double.infinity,
               height: 5,
               color: Color(0xDDF1EBEB),
-              // child: Divider(),
             ),
             SizedBox(
               height: 10,
             ),
-            // SizedBox(height: 32),
             Column(
               children: <Widget>[
                 Text(
@@ -130,16 +122,16 @@ class _profileState extends State<profile> {
                   style: TextStyle(
                     fontSize: 70,
                     fontWeight: FontWeight.bold,
-                    color: kourcolor1, // Use primary color here
+                    color: kourcolor1,
                   ),
                 ),
                 SizedBox(height: 10),
                 Text(
-                  'Hello ${UserPreferences.getUserName()}!\n Email:${UserPreferences.getEmail()}',
+                  'Hello ${UserPreferences.getUserName()}\nEmail: ${UserPreferences.getEmail()}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: kourcolor1, // Use primary color here
+                    color: kourcolor1,
                   ),
                 ),
                 SizedBox(height: 10),
@@ -147,12 +139,10 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
                 Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1, color: Colors.white), // Add black border
+                      border: Border.all(width: 1, color: Colors.white),
                       borderRadius: BorderRadius.circular(0),
                     ),
                     child: GestureDetector(
@@ -160,20 +150,17 @@ class _profileState extends State<profile> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ShippingInformationPage()),
+                              builder: (context) => AddReviewPage()),
                         );
                       },
                       child: Container(
                         height: 55,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          // color: Color(0xFFDFDED9),
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -181,7 +168,6 @@ class _profileState extends State<profile> {
                                   style: TextStyle(
                                     color: kourcolor1,
                                     fontSize: 20,
-                                    // fontWeight: FontWeight.bold,
                                   )),
                               Icon(
                                 Icons.chevron_right,
@@ -194,32 +180,22 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
                 Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1, color: Colors.white), // Add black border
+                      border: Border.all(width: 1, color: Colors.white),
                       borderRadius: BorderRadius.circular(0),
                     ),
                     child: GestureDetector(
-                      onTap: () {
-                        /*  Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => wishlist()),
-                        ); */
-                      },
+                      onTap: () {},
                       child: Container(
                         height: 55,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          // color: Color(0xFFDFDED9),
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -227,7 +203,6 @@ class _profileState extends State<profile> {
                                   style: TextStyle(
                                     color: kourcolor1,
                                     fontSize: 20,
-                                    // fontWeight: FontWeight.bold,
                                   )),
                               Icon(
                                 Icons.chevron_right,
@@ -240,32 +215,29 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
                 Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1, color: Colors.white), // Add black border
+                      border: Border.all(width: 1, color: Colors.white),
                       borderRadius: BorderRadius.circular(0),
                     ),
                     child: GestureDetector(
                       onTap: () {
-                        /*  Navigator.push(
+                        Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Cart()),
-                        ); */
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfileDetailsPage()), // Navigate to ProfileDetailsPage
+                        );
                       },
                       child: Container(
                         height: 55,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          // color: Color(0xFFDFDED9),
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -273,7 +245,6 @@ class _profileState extends State<profile> {
                                   style: TextStyle(
                                     color: kourcolor1,
                                     fontSize: 20,
-                                    // fontWeight: FontWeight.bold,
                                   )),
                               Icon(
                                 Icons.chevron_right,
@@ -286,32 +257,22 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
                 Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1, color: Colors.white), // Add black border
+                      border: Border.all(width: 1, color: Colors.white),
                       borderRadius: BorderRadius.circular(0),
                     ),
                     child: GestureDetector(
-                      onTap: () {
-                        /*  Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Cart()),
-                        ); */
-                      },
+                      onTap: () {},
                       child: Container(
                         height: 55,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          // color: Color(0xFFDFDED9),
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -319,7 +280,6 @@ class _profileState extends State<profile> {
                                   style: TextStyle(
                                     color: kourcolor1,
                                     fontSize: 20,
-                                    // fontWeight: FontWeight.bold,
                                   )),
                               Icon(
                                 Icons.chevron_right,
@@ -332,12 +292,10 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
                 Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1, color: Colors.white), // Add black border
+                      border: Border.all(width: 1, color: Colors.white),
                       borderRadius: BorderRadius.circular(0),
                     ),
                     child: GestureDetector(
@@ -351,13 +309,10 @@ class _profileState extends State<profile> {
                         height: 55,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          // color: Color(0xFFDFDED9),
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -365,7 +320,6 @@ class _profileState extends State<profile> {
                                   style: TextStyle(
                                     color: kourcolor1,
                                     fontSize: 20,
-                                    // fontWeight: FontWeight.bold,
                                   )),
                               Icon(
                                 Icons.chevron_right,
@@ -378,11 +332,9 @@ class _profileState extends State<profile> {
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
-                  // child: Divider(),
                 ),
               ],
             ),
-
             SizedBox(
               height: 140,
             ),
@@ -394,9 +346,7 @@ class _profileState extends State<profile> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: kourcolor1,
-                shape: RoundedRectangleBorder(
-                    //  borderRadius: BorderRadius.circular(18.0),
-                    ),
+                shape: RoundedRectangleBorder(),
                 minimumSize: Size(380, 50),
               ),
             ),

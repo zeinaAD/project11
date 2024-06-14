@@ -1,23 +1,40 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:project1/ipaddress.dart';
+import 'package:project1/models/ShippingInfo.dart';
 import 'package:project1/screens/addcard.dart';
+import 'package:project1/screens/cart.dart';
 import 'package:project1/screens/order_review.dart';
 import 'package:project1/utilities/constants.dart';
+import 'package:project1/widgets/UserPreferences.dart';
+import 'package:http/http.dart' as http;
 
 class PaymentInformationPage extends StatefulWidget {
+  final ShippingInfo shipping;
+  final List<CartItem> cartItems;
+  const PaymentInformationPage({
+    super.key,
+    required this.shipping,
+    required this.cartItems,
+  });
   @override
   State<PaymentInformationPage> createState() => _PaymentInformationPageState();
 }
 
 class _PaymentInformationPageState extends State<PaymentInformationPage> {
+  // ShippingInfo shipping1 = this.shipping;
   List paymentArr = [
     {"name": "Cash on delivery", "icon": "images/cash.jpeg"},
     {"name": "** ** ** 2187", "icon": "images/visa.jpeg"},
-    {"name": "test@gmail.com", "icon": "images/paypal.jpeg"},
+    //{"name": "test@gmail.com", "icon": "images/paypal.jpeg"},
   ];
 
   int selectMethod = -1;
   bool showAddCardView = false; // Boolean to control visibility
+  bool paymentMethod = false;
   final _formKey = GlobalKey<FormState>();
+  int method = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -59,40 +76,6 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
                           fontSize: 13,
                           fontWeight: FontWeight.w500),
                     ),
-                    /* TextButton.icon(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(20),
-                            ),
-                          ),
-                          builder: (context) => DraggableScrollableSheet(
-                            initialChildSize: 0.65, // 80% of screen height
-                            minChildSize:
-                                0.4, // Minimum height of 40% of screen height
-                            maxChildSize:
-                                0.9, // Maximum height of 90% of screen height
-                            expand: false,
-                            builder: (context, scrollController) =>
-                                SingleChildScrollView(
-                              controller: scrollController,
-                              child: AddCardView(),
-                            ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.add, color: kourcolor1),
-                      label: Text(
-                        "Add Card",
-                        style: TextStyle(
-                            color: kourcolor1,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ) */
                   ],
                 ),
                 ListView.builder(
@@ -131,6 +114,10 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
                                 // Show AddCardView if Visa is selected
                                 showAddCardView =
                                     pObj["name"] == "** ** ** 2187";
+                                paymentMethod = true;
+                                // method = 2;
+
+                                print(paymentMethod);
                               });
                             },
                             child: Icon(
@@ -171,11 +158,22 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          orderStoring(
+                              userId: UserPreferences.getUserID(),
+                              shippingAddress: widget.shipping.address +
+                                  ' , ' +
+                                  widget.shipping.city +
+                                  ' , ' +
+                                  widget.shipping.state,
+                              paymentMethod: "cash",
+                              items: widget.cartItems);
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => OrderReviewPage()),
-                          );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderReviewPage(
+                                  shipping: widget.shipping,
+                                ),
+                              ));
                         }
                       },
                       child: Text(
@@ -196,4 +194,53 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
       ),
     );
   }
+
+  Future<void> orderStoring({
+    required String? userId,
+    required String shippingAddress,
+    required String paymentMethod,
+    required List<CartItem> items,
+  }) async {
+    final ipAddress = await getLocalIPv4Address();
+    final List<Map<String, dynamic>> itemsJson = items.map((item) => item.toJson()).toList();
+
+    print("Items JSON: ${itemsJson.toString()}"); // Updated for clearer logging
+
+    final int totalAmount = items.fold(0, (sum, current) => sum + current.price * current.quantity);
+    print("Total Amount: $totalAmount"); // Updated for clearer logging
+
+    final response = await http.post(
+      Uri.parse('http://$ipAddress:5000/orderStoring'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'shipping_address': shippingAddress,
+        'payment_method': paymentMethod,
+        'items': itemsJson,
+        'total_amount': totalAmount,
+        'order_status': 'Processing',
+      }),
+    );
+
+    print("HTTP Response: $response");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Order created successfully!');
+        print('Received response body: ${response.body}');
+        if (response.headers['content-type']?.contains('application/json') ?? false) {
+          try {
+            final responseData = json.decode(response.body);
+            print('Response Data: $responseData');
+          } catch (e) {
+            print('Error parsing response: $e');
+          }
+        } else {
+          print('Received non-JSON response');
+        }
+    } else {
+        print('Failed to create order. Status code: ${response.statusCode}');
+        throw Exception('Failed to create order. Status code: ${response.statusCode}');
+    }
+}
+
 }

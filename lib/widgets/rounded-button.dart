@@ -106,6 +106,41 @@ class _RoundedButtonState extends State<RoundedButton> {
         });
   }
 
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    // Regular Expression for email validation
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    // Password must be at least 8 characters
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    // Password must contain at least one special character
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+      return 'Password must contain at least one special character';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    String? password = widget.passwordController.text;
+
+    if (password == null || value == null || password != value) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -122,6 +157,9 @@ class _RoundedButtonState extends State<RoundedButton> {
           final username = widget.usernameController.text;
 
           if (widget.buttonName == "Register") {
+            // _validateEmail(email);
+            // _validatePassword(password);
+            // _validateConfirmPassword(password);
             await signUp(
               email: email,
               password: password,

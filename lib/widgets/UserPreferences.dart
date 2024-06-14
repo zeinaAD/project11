@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 class UserPreferences {
   static late SharedPreferences _preferences;
 
+  //bool paymentMethod = false;
+
   static Future init() async {
     _preferences = await SharedPreferences.getInstance();
   }
@@ -18,6 +20,21 @@ class UserPreferences {
     return _preferences.getString('email');
   }
 
+  static Future setWidthandheight(double height, double width) async {
+    await _preferences.setDouble('height', height);
+    await _preferences.setDouble('width', width);
+  }
+
+  // Method to retrieve height
+  static double? getHeight() {
+    return _preferences.getDouble('height');
+  }
+
+  // Method to retrieve width
+  static double? getWidth() {
+    return _preferences.getDouble('width');
+  }
+
   static Future removeEmail() async {
     await _preferences.remove('email');
   }
@@ -28,6 +45,14 @@ class UserPreferences {
 
   static String? getUserName() {
     return _preferences.getString('username');
+  }
+
+   static Future setimageUrl(String imageUrl) async {
+    await _preferences.setString('imageUrl', imageUrl);
+  }
+
+  static String? getimageUrl() {
+    return _preferences.getString('imageUrl');
   }
 
   static Future removeUserName() async {

@@ -27,19 +27,35 @@ class ProductDetails extends StatefulWidget {
 class _ProductDetailsState extends State<ProductDetails>
     with TickerProviderStateMixin {
   double _value = 4;
-  Color _statusColor = kourcolor1;
-  List<String> assets = [
-    'images/ring3.jpg',
-    'images/ring3.jpg',
-    'images/ring3.jpg',
-  ];
-  final color = [
-    Color(0xA5FFFFFF),
-    Color(0xA5FFFFFF),
-    Color(0xA5FFFFFF),
-  ];
+  //Color _statusColor = kourcolor1;
   int currentindex = 0;
   int _quantity = 0;
+
+  double _fav = 0;
+
+  List<int> ratings = [4, 5, 3, 4, 2];
+  List<String> reviews = [
+    'This product is amazing! It exceeded my expectations.',
+    'I love the color options. They are so vibrant!',
+    'The quality of the product is top-notch. Highly recommend.',
+    'The price is a bit high, but it\'s worth it for the quality.',
+  ];
+
+  void _addReview(String review, int rating) {
+    setState(() {
+      reviews.add(review);
+      ratings.add(rating);
+    });
+  }
+
+  void _showAddReviewDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AddReviewDialog(onSubmit: _addReview);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +66,28 @@ class _ProductDetailsState extends State<ProductDetails>
           color: Colors.white,
           height: 100,
           child: Row(children: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.favorite_border,
-                color: kourcolor1,
-                size: 35,
-              ),
-              onPressed: () {
-                // Handle favorite button press
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(1, (index) {
+                return IconButton(
+                  icon: Icon(
+                    index < _fav ? Icons.favorite : Icons.favorite_border,
+                    size: 35,
+                  ),
+                  color: kourcolor1,
+                  onPressed: () {
+                    // print("name:" + widget.product.title.toString());
+                    addItemToWishlist(
+                      userId: UserPreferences.getUserID(),
+                      productId: widget.product.id,
+                    );
+                    setState(() {
+                      // print("name:" + widget.product.title.toString());
+                      _fav = index + 1.0;
+                    });
+                  },
+                );
+              }),
             ),
             Expanded(
               child: Container(
@@ -68,10 +97,7 @@ class _ProductDetailsState extends State<ProductDetails>
                     //call future
                     addItemToCart(
                         userId: UserPreferences.getUserID(),
-                        productId: widget.product.id,
-                        //   " ", //////////////////////////////////change this
-                        quantity: _quantity,
-                        size: _value);
+                        productId: widget.product.id);
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(kourcolor1),
@@ -183,7 +209,6 @@ class _ProductDetailsState extends State<ProductDetails>
                         ],
                       ),
                     ),
-
                     Container(
                       height: 1500,
                       width: double.infinity,
@@ -230,21 +255,21 @@ class _ProductDetailsState extends State<ProductDetails>
                                 )
                               ],
                             ),
-                            Container(
-                              height: 1.5,
-                              width: 700,
-                              color: Color(0x9F201E1E),
-                            ),
+                            // Container(
+                            //   height: 1.5,
+                            //   width: 700,
+                            //   color: Color(0x9F201E1E),
+                            // ),
                             ///////////////////////
                             ProductDescription(
                                 product: widget
                                     .product), //////////////////description
 
-                            Container(
-                              height: 1.5,
-                              width: 700,
-                              color: Color(0x9F201E1E),
-                            ),
+                            // Container(
+                            //   height: 1.5,
+                            //   width: 700,
+                            //   color: Color(0x9F201E1E),
+                            // ),
                             Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -300,11 +325,11 @@ class _ProductDetailsState extends State<ProductDetails>
                                       ))
                                 ]),
 
-                            Container(
-                              height: 1.5,
-                              width: 700,
-                              color: Color(0x9F201E1E),
-                            ),
+                            // Container(
+                            //   height: 1.5,
+                            //   width: 700,
+                            //   color: Color(0x9F201E1E),
+                            // ),
                             Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -371,6 +396,69 @@ class _ProductDetailsState extends State<ProductDetails>
                               height: 15,
                             ),
 
+                            // SizedBox(
+                            //   height: 130,
+                            // ),
+                            /////////////////////////////////////////
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Reviews',
+                                    style: TextStyle(
+                                      fontSize: 20.0,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.add, color: kourcolor1),
+                                    onPressed: _showAddReviewDialog,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children:
+                                    List.generate(reviews.length, (index) {
+                                  return Container(
+                                    width: 300,
+                                    margin: EdgeInsets.only(left: 20, top: 10),
+                                    padding: EdgeInsets.all(20.0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: List.generate(
+                                              ratings[index], (i) {
+                                            return Icon(Icons.star,
+                                                color: Colors.yellow, size: 20);
+                                          }),
+                                        ),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          reviews[index],
+                                          style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: const Color.fromARGB(
+                                                255, 32, 32, 32),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
                             SizedBox(
                               height: 130,
                             ),
@@ -378,46 +466,184 @@ class _ProductDetailsState extends State<ProductDetails>
                         ),
                       ),
                     ),
-                    // ),
                   ],
                 ),
               ),
             ],
           ),
         ),
-        // ),
       ),
     );
   }
+
   /////////future function
 
   Future<void> addItemToCart({
     required String? userId,
     required String? productId,
-    required int quantity,
-    double? size,
   }) async {
     final ipAddress = await getLocalIPv4Address();
-    final url = Uri.parse(
-        'http://$ipAddress:5000/addtoCart'); // Change to your actual server URL
-    final headers = {"Content-Type": "application/json"};
+    final url = Uri.parse('http://$ipAddress:5000/addtoCart');
+
+    // Prepare the body before the request
     final body = json.encode({
       'userId': userId,
       'productId': productId,
-      'quantity': quantity,
-      'size': size,
+      'price': widget.product.price,
+      'image': widget.product.image,
+      'size': _value,
+      'quantity': _quantity
     });
 
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      // Include the body in your HTTP POST request
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
       if (response.statusCode == 200) {
         print('Item added to cart successfully');
       } else {
+        // This will help you understand what the server is actually saying
         throw Exception('Failed to add item to cart: ${response.body}');
       }
     } catch (e) {
       print('Error adding item to cart: $e');
     }
+  }
+
+  Future<void> addItemToWishlist({
+    required String? userId,
+    required String? productId,
+  }) async {
+    final ipAddress = await getLocalIPv4Address();
+    final url = Uri.parse(
+        'http://$ipAddress:5000/addtoWishlist'); // Change to your actual server URL
+    final headers = {"Content-Type": "application/json"};
+
+    final body = json.encode({
+      'userId': userId,
+      'productId': productId,
+      'name': widget.product.title,
+      'image': widget.product.image,
+      'price': widget.product.price,
+      'description': widget.product.rate
+    });
+    print(body);
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        print('Item added to wishlist successfully');
+      } else {
+        throw Exception('Failed to add item to wishlist: ${response.body}');
+      }
+    } catch (e) {
+      print('Error adding item to wishlist: $e');
+    }
+  }
+}
+
+class AddReviewDialog extends StatefulWidget {
+  final Function(String, int) onSubmit;
+  const AddReviewDialog({required this.onSubmit});
+
+  @override
+  _AddReviewDialogState createState() => _AddReviewDialogState();
+}
+
+class _AddReviewDialogState extends State<AddReviewDialog> {
+  final _formKey = GlobalKey<FormState>();
+  double _rating = 0;
+  String _review = '';
+
+  void _submitReview() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      widget.onSubmit(_review, _rating.toInt());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Review submitted!')),
+      );
+      Navigator.pop(context); // Close the dialog
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Add Review'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              height: 1.5,
+              width: 700,
+              color: Color(0x9F201E1E),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Rating',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                return IconButton(
+                  icon: Icon(
+                    index < _rating ? Icons.star : Icons.star_border,
+                  ),
+                  color: Colors.amber,
+                  onPressed: () {
+                    setState(() {
+                      _rating = index + 1.0;
+                    });
+                  },
+                );
+              }),
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Review'),
+              maxLines: 5,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your review';
+                }
+                return null;
+              },
+              onSaved: (value) {
+                _review = value!;
+              },
+            ),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submitReview,
+          child: Text(
+            'Submit Review',
+            /* style: TextStyle(
+              color: kourcolor1,
+            ), */
+          ),
+        ),
+      ],
+    );
   }
 }

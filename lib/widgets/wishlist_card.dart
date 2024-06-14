@@ -21,6 +21,13 @@ class WishlistCard extends StatefulWidget {
 
 class _WishlistCardState extends State<WishlistCard> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(widget.product.title.toString());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FocusedMenuHolder(
       blurSize: 4,
@@ -82,9 +89,9 @@ class _WishlistCardState extends State<WishlistCard> {
                 topLeft: Radius.circular(16.0),
                 topRight: Radius.circular(16.0),
               ),
-              child: Image.asset(
+              child: Image.network(
                 widget.product.image,
-                height: 220,
+                height: 180,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
@@ -93,7 +100,7 @@ class _WishlistCardState extends State<WishlistCard> {
               bottom: 30,
               left: 10,
               child: Text(
-                "${widget.product.title.toString()}",
+                "${widget.product.title}",
                 style: Theme.of(context).textTheme.subtitle1!.merge(
                       const TextStyle(
                         fontWeight: FontWeight.w700,
@@ -133,3 +140,37 @@ class _WishlistCardState extends State<WishlistCard> {
     );
   }
 }
+
+// class WishlistItem {
+//   final String name;
+//   // final String id;
+//   final int price;
+//   // final int quantity;
+//   final String productId;
+
+//   WishlistItem(
+//       {required this.name,
+//       required this.price,
+//       //  required this.id,
+//       required this.productId});
+
+//   // Assuming a static method is useful here if needed
+//   factory WishlistItem.fromJson(Map<String, dynamic> json) {
+//     return WishlistItem(
+//       name: json['productName'] as String? ??
+//           'default-name', // Since 'name' isn't provided
+//       productId: json['productId'] as String? ??
+//           'default-product-id', // Adjust as necessary
+//       // quantity: json['quantity'] as int? ?? 0,
+//       price: json['price'] as int? ?? 0,
+//     );
+//   }
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'productName': name,
+//       'productId': productId,
+//       'price': price,
+//       // 'quantity': quantity,
+//     };
+//   }
+// }

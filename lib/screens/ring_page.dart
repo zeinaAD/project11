@@ -19,20 +19,36 @@ class RingPage extends StatefulWidget {
   final String category;
   final String title;
 
+  // @override
+  // State<RingPage> createState() => _RingPageState();
+
   @override
-  State<RingPage> createState() => _RingPageState();
+  State<RingPage> createState() {
+    print("RingPage Constructor - Category: ${category}");
+    return _RingPageState();
+  }
 }
 
 class _RingPageState extends State<RingPage> {
   late Future<List<Product>> futureProducts;
+  // late Future<List<Product>> futureBest;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
+
+    // futureProducts = Product.fetchProducts(
+    // widget.category); // Adjust fetchProducts to accept category
+    print("widget: " + widget.category);
+    if (widget.category == 'best') {
+      futureProducts = Product
+          .fetchBestSellers(); // Use fetchBestSellers when category is 'all'
+    } else if (widget.category == 'new') {
+      futureProducts = Product.fetchNewArrivals();
+    } else {
       futureProducts = Product.fetchProducts(
-          widget.category); // Adjust fetchProducts to accept category
-    });
+          widget.category); // Use fetchProducts for other categories
+    }
   }
 
   int _selectedIndex = 0;

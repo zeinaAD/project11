@@ -53,26 +53,28 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
                         controller: usernameController,
                       ),
                       TextInputField(
-                        icon: Icons.email,
-                        hint: 'Email',
-                        inputType: TextInputType.emailAddress,
-                        inputAction: TextInputAction.next,
-                        controller: emailController,
-                      ),
+                          icon: Icons.email,
+                          hint: 'Email',
+                          inputType: TextInputType.emailAddress,
+                          inputAction: TextInputAction.next,
+                          controller: emailController,
+                          validator: _validateEmail(emailController.text)),
                       PasswordInput(
-                        icon: Icons.lock,
-                        hint: 'Password',
-                        inputType: TextInputType.name,
-                        inputAction: TextInputAction.next,
-                        controller: passwordController,
-                      ),
+                          icon: Icons.lock,
+                          hint: 'Password',
+                          inputType: TextInputType.name,
+                          inputAction: TextInputAction.next,
+                          controller: passwordController,
+                          validator:
+                              _validatePassword(passwordController.text)),
                       ConfirmPassword(
-                        icon: Icons.lock,
-                        hint: 'Confirm Password',
-                        inputType: TextInputType.name,
-                        inputAction: TextInputAction.done,
-                        controller: confirmpasswordController,
-                      ),
+                          icon: Icons.lock,
+                          hint: 'Confirm Password',
+                          inputType: TextInputType.name,
+                          inputAction: TextInputAction.done,
+                          controller: confirmpasswordController,
+                          validator: _validateConfirmPassword(
+                              confirmpasswordController.text)),
                       SizedBox(
                         height: 25,
                       ),
@@ -127,5 +129,40 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
         )
       ],
     );
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    // Regular Expression for email validation
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    // Password must be at least 8 characters
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    // Password must contain at least one special character
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+      return 'Password must contain at least one special character';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    String? password = passwordController.text;
+
+    if (password == null || value == null || password != value) {
+      return 'Passwords do not match';
+    }
+    return null;
   }
 }

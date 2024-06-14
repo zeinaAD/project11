@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
@@ -81,11 +82,26 @@ class _ProductCardState extends State<ProductCard> {
                 topLeft: Radius.circular(16.0),
                 topRight: Radius.circular(16.0),
               ),
-              child: Image.network(
-                widget.product.image,
+              // child: Image.network(
+              //   widget.product.image,
+              //   height: 220,
+              //   width: double.infinity,
+              //   fit: BoxFit.cover,
+              // ),
+              child: CachedNetworkImage(
+                imageUrl: widget.product.image.toString(),
                 height: 220,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: double.infinity,
+                  height: 220,
+                  color: Colors.grey[300],
+                  child: Center(
+                    child: CircularProgressIndicator(color: kourcolor1),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             ),
             Positioned(
@@ -109,7 +125,7 @@ class _ProductCardState extends State<ProductCard> {
                 '\$${widget.product.price.toString()}',
                 style: Theme.of(context).textTheme.subtitle2!.merge(
                       TextStyle(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w900,
                         color: kourcolor1,
                       ),
                     ),

@@ -42,8 +42,7 @@ class _chatState extends State<chat> {
                 color: kourcolor1,
               ),
             ),
-          ]
-          ),
+          ]),
       body: Column(
         children: [
           Expanded(
@@ -51,8 +50,8 @@ class _chatState extends State<chat> {
               children: [
                 ChatMessage(
                     message: 'Hello, what can we help you with?',
-                    senderName: 'User 1'),
-                ChatMessage(message: 'Hi there!', senderName: 'User 2'),
+                    senderName: 'Owner'),
+                ChatMessage(message: 'Hi there!', senderName: 'Me'),
                 // Add more ChatMessage widgets for additional messages
               ],
             ),
