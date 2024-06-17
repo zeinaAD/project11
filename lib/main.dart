@@ -19,12 +19,20 @@ import 'package:project1/screens/wishlist.dart';
 import 'package:project1/widgets/UserPreferences.dart';
 import 'package:project1/widgets/imagePicker.dart';
 import 'package:project1/models/user.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ////////////
+  var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
 
-  WidgetsFlutterBinding.ensureInitialized();
+  var initSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
   try {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
@@ -41,7 +49,9 @@ void main() async {
     print('Error initializing Firebase: $e');
   }
 
+  await FirebaseApi().initNotifications();
   await UserPreferences.init();
+  await flutterLocalNotificationsPlugin.initialize(initSettings);
   runApp(const MyApp());
   // await FirebaseApi().initNotifications();
   //runApp(MyApp());

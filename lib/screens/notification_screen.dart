@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:project1/api/firebase_api.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
@@ -10,7 +10,8 @@ class NotificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = ModalRoute.of(context)!.settings.arguments;
+    final message = ModalRoute.of(context)!.settings.arguments as RemoteMessage;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Push Notification'),
@@ -20,9 +21,9 @@ class NotificationScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Push Notifications Page '),
-            // Text('${message?.notification?.title}'),
-            // Text('${message?.notification?.body}'),
-            // Text('${message?.data}')
+            Text('${message.notification?.title}'),
+            Text('${message.notification?.body}'),
+            Text('${message.data}')
           ],
         ),
       ),

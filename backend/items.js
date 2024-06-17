@@ -21,7 +21,7 @@ async function handleItemsStoring(req, res) {
        // date
       });
   
-      // Save the student document to the database
+      // Save the item document to the database
       await item.save();
   
       res.status(200).send('item storing successful');

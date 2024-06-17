@@ -8,6 +8,7 @@ import 'package:project1/screens/login1.dart';
 import 'package:project1/screens/notification.dart';
 import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
+import 'package:project1/widgets/UserPreferences.dart';
 
 class NavigationDrawerWidget extends StatefulWidget {
   // final Product product;
@@ -35,7 +36,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                   Column(
                     children: [
                       Text(
-                        'Rand Suwan       ',
+                        UserPreferences.getUserName()!,
                         style: TextStyle(
                           fontSize: 35,
                           //   fontWeight: FontWeight.bold,
@@ -43,7 +44,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
                         ),
                       ),
                       Text(
-                        'rand.nabil.2019@gmail.com           ',
+                        UserPreferences.getEmail()!,
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.white,

@@ -6,14 +6,15 @@ const User = require('./models/user');
 
 async function handleSignup(req, res) {
     console.log('********* Request body:', req.body);
-    const { username, email, password } = req.body;
+    const { username, email, password , phoneNumber } = req.body;
   
     try {
       // Create a new student document
       const user = new User({
         username,
         email,
-        password
+        password,
+        phoneNumber
       });
   
       // Save the student document to the database

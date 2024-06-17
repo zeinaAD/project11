@@ -37,8 +37,13 @@
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = null;
   </script>
-  <script type="text/javascript">
-    window.flutterWebRenderer = "html";
+  <script src="main.dart.js" type="application/javascript"></script>
+  <script>
+    engineInitializer.initializeEngine({
+      renderer: 'canvaskit' // Options are 'canvaskit' or 'html'
+    }).then((_) => {
+      engineInitializer.startApp();
+    });
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>

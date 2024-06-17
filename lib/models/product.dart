@@ -9,6 +9,7 @@ class Product {
   final String image;
   final String? price;
   final String? rate;
+  final String? category;
 
   Product({
     required this.id,
@@ -16,18 +17,20 @@ class Product {
     required this.image,
     this.price,
     this.rate,
+    this.category,
     // required id,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['_id'],
-      title: json['name'],
-      image: json['image'],
-      rate: json['description'],
-      price: json['price']
-          .toString(), // convert num to double and default to 0.0 if price is nul
-    );
+        id: json['_id'],
+        title: json['name'],
+        image: json['image'],
+        rate: json['description'],
+        price: json['price'].toString(),// convert num to double 
+        category: json[
+            'category'] 
+        );
   }
 
   static Future<List<Product>> fetchProducts(String category) async {

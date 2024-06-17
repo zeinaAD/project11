@@ -90,6 +90,7 @@ class _ProductCardState extends State<ProductCard> {
               // ),
               child: CachedNetworkImage(
                 imageUrl: widget.product.image.toString(),
+              
                 height: 220,
                 width: double.infinity,
                 fit: BoxFit.cover,

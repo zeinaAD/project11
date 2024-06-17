@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:project1/ipaddress.dart';
+import 'package:project1/models/Gproduct.dart';
+import 'package:project1/screens/productDetails.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:project1/models/designRings.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:project1/ipaddress.dart';
+import 'package:project1/widgets/UserPreferences.dart';
 
 class DesignRing extends StatefulWidget {
   const DesignRing({super.key, required this.name});
@@ -18,9 +25,11 @@ class _DesignRingState extends State<DesignRing> {
   String currentImagePath = "project1/images/ring5.jpg"; // Default image path
   String imageUrl =
       "https://firebasestorage.googleapis.com/v0/b/gradprojfb.appspot.com/o/items%2Fitem_1716060796603_100.jpg?alt=media&token=9ecb5d82-3d3a-40f3-95d1-8e4424593cac";
-  String rname = "";
+  String rname = "ring";
   String name = "";
-  String price = "";
+  String price = "1500";
+//  late final Product product;
+
   late Future<Set<design>> futureDYR;
   final ScrollController _scrollController = ScrollController();
 
@@ -198,8 +207,22 @@ class _DesignRingState extends State<DesignRing> {
                   width: size.width * 0.45,
                   decoration: BoxDecoration(),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // Handle button press
+                      // image , name , price ,size , quantity
+                      ////////////////////////////////////////
+                      DateTime now = DateTime.now();
+                      String date = DateFormat('yyyy-MM-dd').format(now);
+                      await itemStoring(
+                          name: rname,
+                          category: "Ring",
+                          image: imageUrl,
+                          price: price,
+                          quantity: 1.toString(),
+                          description: "bbb",
+                          date: date);
+                      /////////////////////////////////////////////////
+                      addDesignItemToCart(userId: UserPreferences.getUserID());
                     },
                     style: ButtonStyle(
                       backgroundColor:
@@ -623,5 +646,112 @@ class _DesignRingState extends State<DesignRing> {
         ],
       ),
     );
+  }
+
+  Future<void> itemStoring({
+    required String name,
+    required String category,
+    required String image,
+    required String price,
+    required String quantity,
+    required String description,
+    required String date,
+  }) async {
+    final ipAddress = await getLocalIPv4Address();
+    final url = Uri.parse('http://$ipAddress:5000/itemStoring');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'name': name,
+          'category': category,
+          'image': image,
+          'price': price,
+          'quantity': quantity,
+          'description': description,
+          'date': date,
+        },
+      );
+      if (response.statusCode == 200) {
+        // Data sent successfully
+        print('successful item storing ');
+        // final productJson = json.decode(response.body);
+        // product = Product.fromJson(productJson);
+        /// return product; // Return the Product object
+      } else {
+        print('HTTP error: ${response.statusCode}');
+        // return null;
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print('Error: $error');
+      //return null;
+    }
+  }
+
+  Future<Product?> getLatestItem() async {
+    final ipAddress = await getLocalIPv4Address();
+    final String url =
+        'http://$ipAddress:5000/last-item'; // Replace with your actual server URL
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // Assuming that the server returns a JSON object that matches the Item model
+        return Product.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 404) {
+        print('No items found.');
+        return null;
+      } else {
+        print('Failed to load item with status code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error occurred while fetching data: $e');
+      return null;
+    }
+  }
+
+  Future<void> addDesignItemToCart({
+    required String? userId,
+  }) async {
+    print("inside future");
+    final ipAddress = await getLocalIPv4Address();
+    final url = Uri.parse('http://$ipAddress:5000/addtoCart');
+    print(rname);
+    print(price);
+
+    // Prepare the body before the request
+    final body = json.encode({
+      'userId': userId,
+      'productId': "product.id",
+      'product_name': rname,
+      'price': price,
+      'image': imageUrl,
+      'size': 4.5,
+      'quantity': 1
+    });
+    print("Sending JSON body: $body");
+
+    try {
+      // Include the body in your HTTP POST request
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print('Item added to cart successfully');
+      } else {
+        // This will help you understand what the server is actually saying
+        throw Exception('Failed to add item to cart: ${response.body}');
+      }
+    } catch (e) {
+      print('Error adding item to cart: $e');
+    }
   }
 }

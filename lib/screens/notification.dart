@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:project1/main.dart';
 import 'package:project1/screens/cart.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/profile.dart';
 import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
-
 
 class notification extends StatefulWidget {
   const notification({super.key});
@@ -42,7 +43,7 @@ class _notificationState extends State<notification> {
           // Handle shopping cart icon tap
           break;
         case 2:
-         /*  Navigator.push(
+          /*  Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => wishlist()),
           ); */
@@ -131,6 +132,7 @@ class _notificationState extends State<notification> {
                       height: 1,
                     )),
                 itemBuilder: ((context, index) {
+                  showNotification(); //////////
                   var cObj = notificationArr[index] as Map? ?? {};
                   return Container(
                     decoration: BoxDecoration(
@@ -187,5 +189,23 @@ class _notificationState extends State<notification> {
         ),
       ),
     );
+  }
+
+  Future<void> showNotification() async {
+    var androidDetails = AndroidNotificationDetails(
+      'channelId',
+      'channelName',
+      channelDescription: 'your channel description',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    // var iosDetails = IOSNotificationDetails();
+    var generalNotificationDetails = NotificationDetails(
+      android: androidDetails,
+      //iOS: iosDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.show(0, 'Notification Title',
+        'This is the Notification Body', generalNotificationDetails);
   }
 }

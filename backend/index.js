@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 const session = require('express-session');
 var jsonParser = bodyParser.json();
 const cors = require("cors");
+const mongoose = require("mongoose");
 
 var urlencoderParser = bodyParser.urlencoded({ extended: false });
 
@@ -133,7 +134,6 @@ app.get('/getID/:email', async (req, res) => {
 });
 
 
-
 const Cart = require('./models/cart');
 app.get('/fetchCartItems/:userId', async (req, res) => {
 
@@ -150,10 +150,18 @@ app.get('/fetchCartItems/:userId', async (req, res) => {
 
     const itemsWithDetails = await Promise.all(
       cart.items.map(async item => {
-        //  console.log("Current item:", item);
-        // console.log(item.size);  // This should correctly log the size
-        // console.log(item.quantity);
-
+        if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+          return {
+            ...item,
+            productName: "Invalid product ID",
+            productPrice: 0,
+            productSize: 'N/A',
+            productQuantity: item.quantity,
+            productImage: item.image || 'default_image.jpg', // Provide a default if none
+            productName: item.name,
+          };
+        }
+    
         const product = await Item.findById(item.productId);
         if (!product) {
           return {
@@ -397,6 +405,49 @@ app.put('/editEmail/:id', (req, res) => {
     })
     .catch(err => res.status(400).json('Error: ' + err));
 });
+
+//update gold prices 
+app.put('/update-prices', async (req, res) => {
+  const { goldPrices } = req.body;
+
+  try {
+    const items = await GItem.find({});
+    const updates = items.map(async item => {
+      console.log(`Updating item with ID ${item._id}: weight = ${item.weight}, carat = ${item.carat}, price per unit = ${goldPrices[item.carat]}`);
+
+      const weight = parseFloat(item.weight);
+      const pricePerUnit = goldPrices[item.carat];
+
+      if (isNaN(weight) || pricePerUnit === undefined) {
+        console.error(`Invalid data for item with ID ${item._id}: weight = ${weight}, pricePerUnit = ${pricePerUnit}`);
+        return item; // Skip updating this item
+      }
+
+      const newPrice = weight * pricePerUnit;
+      return GItem.findByIdAndUpdate(item._id, { $set: { price: newPrice }}, { new: true });
+    });
+
+    const updatedItems = await Promise.all(updates);
+    res.json({ success: true, updatedItems });
+  } catch (error) {
+    res.status(500).send({ success: false, message: error.message });
+  }
+});
+
+// get last item added to items collection
+app.get('/last-item', async (req, res) => {
+  try {
+    const lastItem = await Item.findOne().sort({ date: -1 });
+    if (!lastItem) {
+      return res.status(404).json({ message: "No items found." });
+    }
+    res.json(lastItem);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

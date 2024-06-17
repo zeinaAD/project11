@@ -41,6 +41,15 @@ class _ProductDetailsState extends State<ProductDetails>
     'The price is a bit high, but it\'s worth it for the quality.',
   ];
 
+  late Future<List<Product>> futureRelatedProducts;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    futureRelatedProducts = fetchRelatedProducts(widget.product.category);
+  }
+
   void _addReview(String review, int rating) {
     setState(() {
       reviews.add(review);
@@ -462,6 +471,76 @@ class _ProductDetailsState extends State<ProductDetails>
                             SizedBox(
                               height: 130,
                             ),
+
+                            //////////////////////////////////////////////////////
+                            Text(
+                              'Recommended for You',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // FutureBuilder<List<Product>>(
+                            //   future:
+                            //       futureRelatedProducts, // Make sure you implement this method
+                            //   builder: (context, snapshot) {
+                            //     if (snapshot.connectionState ==
+                            //         ConnectionState.waiting) {
+                            //       return Center(
+                            //           child: CircularProgressIndicator());
+                            //     } else if (snapshot.hasError) {
+                            //       return Text('Error: ${snapshot.error}');
+                            //     } else if (snapshot.hasData) {
+                            //       return SingleChildScrollView(
+                            //         scrollDirection: Axis.horizontal,
+                            //         child: Row(
+                            //           children: snapshot.data!.map((product) {
+                            //             return ProductCard(product: product);
+                            //           }).toList(),
+                            //         ),
+                            //       );
+                            //     } else {
+                            //       return Text('No related products found.');
+                            //     }
+                            //   },
+                            // ),
+                            Expanded(
+                              child: FutureBuilder<List<Product>>(
+                                
+                                future:
+                                    futureRelatedProducts, // Implement this future to fetch data
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else if (snapshot.hasData) {
+                                    return GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 10,
+                                        mainAxisSpacing: 10,
+                                        childAspectRatio: 0.8,
+                                      ),
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: (context, index) {
+                                        return ProductCard(
+                                            product: snapshot.data![index]);
+                                      },
+                                    );
+                                  } else {
+                                    return Text('No related products found.');
+                                  }
+                                },
+                              ),
+                            ),
+
+                            SizedBox(
+                              height: 130,
+                            ),
                           ],
                         ),
                       ),
@@ -543,6 +622,31 @@ class _ProductDetailsState extends State<ProductDetails>
       }
     } catch (e) {
       print('Error adding item to wishlist: $e');
+    }
+  }
+
+  static Future<List<Product>> fetchRelatedProducts(String? category) async {
+    final ipAddress = await getLocalIPv4Address();
+    // Update your API endpoint URL to include the category as a query parameter
+    final response = await http
+        .get(Uri.parse('http://$ipAddress:5000/fetchItems/$category'));
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print(
+          'products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load products, Status code: ${response.statusCode}');
     }
   }
 }

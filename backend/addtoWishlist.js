@@ -4,7 +4,7 @@ const Wishlist = require('./models/wishlist'); // Import the Cart model
 
 async function handleAddToWishlist(req, res) {
     console.log('********* Request body 11:', req.body);
-    const { name ,productId,  userId,price ,image, description } = req.body;
+    const { productName ,productId,  userId,price ,image, description } = req.body;
 
     try {
         // Check if the cart for the user exists
@@ -20,7 +20,7 @@ async function handleAddToWishlist(req, res) {
             // } else {
                 // Item does not exist, add new item to the array
                 wishlist.items.push({
-                    name,
+                    productName,
                     productId,
                     price,
                     image,
@@ -32,7 +32,7 @@ async function handleAddToWishlist(req, res) {
             wishlist = new Wishlist({
                 userId,
                 items: [{
-                    name,
+                    productName,
                     productId,
                     price,
                     image,

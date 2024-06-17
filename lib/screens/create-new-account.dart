@@ -23,6 +23,7 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
   final TextEditingController confirmpasswordController =
       TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController(); 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {

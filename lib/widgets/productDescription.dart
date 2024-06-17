@@ -56,7 +56,7 @@ class _ProductDescriptionState extends State<ProductDescription> {
               AnimatedCrossFade(
                 duration: Duration(milliseconds: 300),
                 firstChild: Text(
-                  widget.product.rate!.substring(0, 100) + '...',
+                  widget.product.rate!.substring(0, 100) + '...',////////////////////////////
                   style: TextStyle(
                     color: kourcolor1,
                     fontSize: 16,
