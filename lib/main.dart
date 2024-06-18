@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
             RingPage(category: 'best', title: '  Our Best Sellers  '),
         'NewArrivalPage': (context) =>
             RingPage(category: 'new', title: '  Our New Ariivals  '),
-        'chatPage': (context) => chat(),
+        'chatPage': (context) => Chat(),
         'ProductDetails': (context) => ProductDetails(product: product),
         'wishlist': (context) => wishlist(),
         'profile': (context) => profile(),

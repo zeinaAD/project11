@@ -60,6 +60,8 @@ dependencies:
   image: ^4.2.0
   cached_network_image: ^3.2.3
   flutter_local_notifications: ^9.8.0+1
+  tflite_flutter: ^0.10.4
+ 
 
 
 dev_dependencies:
@@ -177,6 +179,9 @@ flutter:
     - images/visa.jpeg
     - images/paypal.jpeg
     - images/hand01.jpg
+    - images/ringg.jpg
+    - images/ringg1.png
+
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -21,6 +21,7 @@ class _loginpageeState extends State<loginpagee> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -85,6 +86,7 @@ class _loginpageeState extends State<loginpagee> {
                       emailController: emailController,
                       passwordController: passwordController,
                       usernameController: usernameController,
+                      phoneNumberController: phoneNumberController,
                     ),
                     SizedBox(
                       height: 25,

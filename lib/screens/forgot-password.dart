@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:project1/utilities/constants.dart';
@@ -16,6 +17,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -79,6 +81,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                       emailController: emailController,
                       passwordController: passwordController,
                       usernameController: usernameController,
+                      phoneNumberController: phoneNumberController,
                     )
                   ],
                 ),

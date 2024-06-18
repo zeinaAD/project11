@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project1/ipaddress.dart';
 import 'package:project1/screens/admin_page.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/login1.dart';
+import 'package:project1/screens/ring_on_hand.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:project1/widgets/SecureStorage.dart';
@@ -16,18 +18,21 @@ class RoundedButton extends StatefulWidget {
     required this.usernameController,
     required this.emailController,
     required this.passwordController,
+    required this.phoneNumberController,
   });
 
   final String buttonName;
   final TextEditingController usernameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
+  final TextEditingController phoneNumberController;
 
   @override
   State<RoundedButton> createState() => _RoundedButtonState();
 }
 
 class _RoundedButtonState extends State<RoundedButton> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   void _incorrectpassword() {
     showDialog(
         context: context,
@@ -155,21 +160,25 @@ class _RoundedButtonState extends State<RoundedButton> {
           final email = widget.emailController.text;
           final password = widget.passwordController.text;
           final username = widget.usernameController.text;
+          final phoneNumber = widget.phoneNumberController.text;
 
           if (widget.buttonName == "Register") {
             // _validateEmail(email);
             // _validatePassword(password);
             // _validateConfirmPassword(password);
             await signUp(
-              email: email,
-              password: password,
-              username: username,
-            );
+                email: email,
+                password: password,
+                username: username,
+                phoneNumber: phoneNumber);
             /* Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => loginpagee()),
             ); */
           } else if (widget.buttonName == "Login") {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => RingOnHand()),
+            );
             await logIn(
               email: email,
               password: password,
@@ -200,6 +209,7 @@ class _RoundedButtonState extends State<RoundedButton> {
     required String username,
     required String email,
     required String password,
+    required String phoneNumber,
   }) async {
     final ipAddress = await getLocalIPv4Address();
     final url = Uri.parse('http://$ipAddress:5000/signup');
@@ -214,6 +224,7 @@ class _RoundedButtonState extends State<RoundedButton> {
           'username': username,
           'email': email,
           'password': password,
+          'phoneNumber': phoneNumber,
         },
       );
 

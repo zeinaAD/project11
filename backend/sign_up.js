@@ -19,7 +19,7 @@ async function handleSignup(req, res) {
   
       // Save the student document to the database
       await user.save();
-      res.json({token:"1234567890"});
+      //res.json({token:"1234567890"});
       res.status(200).send('Signup successful');
     } catch (error) {
       console.error('Error inserting data into the database:', error.message);

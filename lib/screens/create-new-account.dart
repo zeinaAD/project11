@@ -60,6 +60,14 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
                           inputAction: TextInputAction.next,
                           controller: emailController,
                           validator: _validateEmail(emailController.text)),
+                          TextInputField(
+                        icon: Icons.phone,
+                        hint: 'Phone Number',
+                        inputType: TextInputType.phone,
+                        inputAction: TextInputAction.next,
+                        controller: phoneNumberController,
+                      ),
+
                       PasswordInput(
                           icon: Icons.lock,
                           hint: 'Password',
@@ -84,6 +92,7 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
                         emailController: emailController,
                         passwordController: passwordController,
                         usernameController: usernameController,
+                        phoneNumberController: phoneNumberController,
                       ),
                       SizedBox(
                         height: 30,

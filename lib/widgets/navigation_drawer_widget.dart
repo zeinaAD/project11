@@ -212,7 +212,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 4:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => chat(),
+          builder: (context) => Chat(),
         ));
         break;
       case 5:
