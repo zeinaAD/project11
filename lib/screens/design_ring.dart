@@ -28,7 +28,8 @@ class _DesignRingState extends State<DesignRing> {
   String rname = "ring";
   String name = "";
   String price = "1500";
-//  late final Product product;
+  String? id = " ";
+  late final Product product;
 
   late Future<Set<design>> futureDYR;
   final ScrollController _scrollController = ScrollController();
@@ -221,6 +222,9 @@ class _DesignRingState extends State<DesignRing> {
                           quantity: 1.toString(),
                           description: "bbb",
                           date: date);
+
+                      id = getLatestItem().toString();
+
                       /////////////////////////////////////////////////
                       addDesignItemToCart(userId: UserPreferences.getUserID());
                     },
@@ -692,7 +696,7 @@ class _DesignRingState extends State<DesignRing> {
     }
   }
 
-  Future<Product?> getLatestItem() async {
+  Future<String?> getLatestItem() async {
     final ipAddress = await getLocalIPv4Address();
     final String url =
         'http://$ipAddress:5000/last-item'; // Replace with your actual server URL
@@ -700,18 +704,21 @@ class _DesignRingState extends State<DesignRing> {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        // Assuming that the server returns a JSON object that matches the Item model
-        return Product.fromJson(json.decode(response.body));
+        // Decode the JSON response
+        final data = json.decode(response.body);
+        // Assuming that the JSON object contains an 'id' field
+        String? productId = data['id'];
+        return productId; // Return the ID of the latest item
       } else if (response.statusCode == 404) {
         print('No items found.');
-        return null;
+        return null; // Return null if no item is found
       } else {
         print('Failed to load item with status code: ${response.statusCode}');
-        return null;
+        return null; // Return null on other HTTP errors
       }
     } catch (e) {
       print('Error occurred while fetching data: $e');
-      return null;
+      return null; // Return null on exception
     }
   }
 
@@ -727,7 +734,7 @@ class _DesignRingState extends State<DesignRing> {
     // Prepare the body before the request
     final body = json.encode({
       'userId': userId,
-      'productId': "product.id",
+      'productId': id,
       'product_name': rname,
       'price': price,
       'image': imageUrl,
