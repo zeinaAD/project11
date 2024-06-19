@@ -197,7 +197,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 1:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => wishlist(),
+          builder: (context) => wishlist(isDiamond: true,),
         ));
         break;
       case 2:

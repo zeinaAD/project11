@@ -113,4 +113,87 @@ class Product {
           'Failed to load products, Status code: ${response.statusCode}');
     }
   }
+
+  static Future<List<Product>> fetchGProducts(String category) async {
+    final ipAddress = await getLocalIPv4Address();
+    // Update your API endpoint URL to include the category as a query parameter
+    final response = await http
+        .get(Uri.parse('http://$ipAddress:5000/fetchGItems/$category'));
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print(
+          'products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Product>> fetchGBestSellers() async {
+    print("inside fetch best sellers future function");
+    final ipAddress = await getLocalIPv4Address();
+    // Update your API endpoint URL to include the category as a query parameter
+    final response =
+        await http.get(Uri.parse('http://$ipAddress:5000/fetchGBestSellers'));
+
+    print('Raw JSON response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print(
+          'products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Product>> fetchGNewArrivals() async {
+    print("inside fetch new sellers future function");
+    final ipAddress = await getLocalIPv4Address();
+    // Update your API endpoint URL to include the category as a query parameter
+    final response =
+        await http.get(Uri.parse('http://$ipAddress:5000/fetchGNewArrivals'));
+
+    print('Raw JSON response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print(
+          'products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
+  
 }

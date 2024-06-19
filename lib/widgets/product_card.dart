@@ -13,7 +13,8 @@ import 'package:project1/widgets/rounded-button1.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
-  const ProductCard({super.key, required this.product});
+ final bool isDiamond;
+  const ProductCard({super.key, required this.product, required this.isDiamond});
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -34,7 +35,10 @@ class _ProductCardState extends State<ProductCard> {
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductDetails(product: widget.product),
+            builder: (context) => ProductDetails(
+              product: widget.product,
+              isDiamond: widget.isDiamond,
+            ),
           ),
         );
       },
@@ -44,7 +48,10 @@ class _ProductCardState extends State<ProductCard> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => ProductDetails(product: widget.product),
+                  builder: (context) => ProductDetails(
+                    product: widget.product,
+                    isDiamond: widget.isDiamond,
+                  ),
                 ),
               );
             },
@@ -90,7 +97,6 @@ class _ProductCardState extends State<ProductCard> {
               // ),
               child: CachedNetworkImage(
                 imageUrl: widget.product.image.toString(),
-              
                 height: 220,
                 width: double.infinity,
                 fit: BoxFit.cover,

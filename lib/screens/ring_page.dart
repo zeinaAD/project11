@@ -169,7 +169,7 @@ class _RingPageState extends State<RingPage> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) =>
-                        ProductCard(product: snapshot.data![index]),
+                        ProductCard(product: snapshot.data![index], isDiamond: true),
                     childCount: snapshot.data!.length,
                   ),
                 );

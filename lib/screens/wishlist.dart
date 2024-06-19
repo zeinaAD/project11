@@ -10,7 +10,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class wishlist extends StatefulWidget {
-  const wishlist({Key? key}) : super(key: key);
+  final bool isDiamond;
+  const wishlist({Key? key, required this.isDiamond}) : super(key: key);
 
   @override
   State<wishlist> createState() => _wishlistState();
@@ -110,7 +111,10 @@ class _wishlistState extends State<wishlist> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 Product product1 = Product.fromJson(snapshot.data![index]);
-                return WishlistCard(product: product1);
+                return WishlistCard(
+                  product: product1,
+                  isDiamond: widget.isDiamond,
+                );
               },
             );
           } else {

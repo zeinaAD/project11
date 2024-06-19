@@ -67,6 +67,14 @@ class UserPreferences {
     return _preferences.getString('id');
   }
 
+    static Future setUserPN(String phoneNumber) async {
+    await _preferences.setString('phoneNumber', phoneNumber);
+  }
+
+  static String? getUserPN() {
+    return _preferences.getString('phoneNumber');
+  }
+
   // Method to fetch the username from the server based on the stored email
   static Future getName(String email) async {
     //String? email = getEmail();
@@ -108,6 +116,32 @@ class UserPreferences {
           if (id != null) {
             setUserID(id); // Save the fetched name in SharedPreferences
             return id;
+          }
+        } else {
+          throw Exception('Failed to fetch id from the server');
+        }
+      } catch (e) {
+        print('Error fetching id: $e');
+      }
+    } else {
+      print('Email is not set');
+    }
+  }
+
+    static Future getPN(String email) async {
+    //String? email = getEmail();
+    final ipAddress = await getLocalIPv4Address();
+    if (email != null) {
+      try {
+        final response =
+            await http.get(Uri.parse('http://$ipAddress:5000/getPhoneNumber/$email'));
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          var data = jsonDecode(response.body);
+          int? phoneNumber = data['phoneNumber'];
+          if (phoneNumber != null) {
+            setUserPN(phoneNumber.toString()); // Save the fetched name in SharedPreferences
+            return phoneNumber;
           }
         } else {
           throw Exception('Failed to fetch id from the server');

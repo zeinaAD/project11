@@ -53,12 +53,36 @@ app.get('/fetchWishlistItems/:id', async (req, res) => {
       return res.status(404).send('no Wishlist found');
     }
 
-    const items = wishlist.items;
+    const items = await Promise.all(
+      wishlist.items.map(async (item) => {
+        let product = await Item.findById(item.productId);
+        if (!product) {
+          product = await GItem.findById(item.productId);
+        }
+
+        if (product) {
+          return {
+            ...item._doc,
+            ...product._doc,
+          };
+        } else {
+          return {
+            ...item._doc,
+            productName: 'Product not found',
+            productPrice: 0,
+            productImage: 'default_image.jpg', // Provide a default image if not found
+          };
+        }
+      })
+    );
+
     res.status(200).json(items);
   } catch (error) {
     res.status(500).send(error.message);
   }
-})
+});
+
+
 const DYRItem = require('./models/DYRitem');
 
 app.get('/fetchDYR/:name', async (req, res) => {
@@ -133,6 +157,28 @@ app.get('/getID/:email', async (req, res) => {
   }
 });
 
+app.get('/getPhoneNumber/:email', async (req, res) => {
+  console.log("inside get phone number");
+  const email = req.params.email;
+
+  if (!email) {
+    return res.status(400).send('Email parameter is required');
+  }
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      res.json({ phoneNumber: user.phoneNumber }); // 
+      // return user._id
+      // res.status(200).json(user);
+    } else {
+      res.status(404).send('User not found');
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 const Cart = require('./models/cart');
 app.get('/fetchCartItems/:userId', async (req, res) => {
@@ -161,8 +207,12 @@ app.get('/fetchCartItems/:userId', async (req, res) => {
             productName: item.name,
           };
         }
-    
-        const product = await Item.findById(item.productId);
+        let product = await Item.findById(item.productId);
+        if (!product) {
+          product = await GItem.findById(item.productId);
+        }
+
+        // const product = await Item.findById(item.productId);
         if (!product) {
           return {
             //...item._doc,  // Spread operator to include all cart item properties
@@ -291,6 +341,32 @@ app.get('/fetchNewArrivals', async (req, res) => {
   }
 });
 
+//fetch gbest sellers 
+const GBestSeller = require('./models/gbestSellers');
+app.get('/fetchGBestSellers', async (req, res) => {
+  try {
+    console.log("inside gbest sellers fetching api");
+
+    const gbestitems = await GBestSeller.find();
+    res.status(200).json(gbestitems);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// fetch gnew arrivals 
+const GNewArrival = require('./models/gnewArrivals');
+
+app.get('/fetchGNewArrivals', async (req, res) => {
+  try {
+    console.log("inside new arrivals fetching api");
+    const gnewArrivals = await GNewArrival.find({});
+    res.status(200).json(gnewArrivals);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 //newest items
 app.get('/fetchNewestItems', async (req, res) => {
   try {
@@ -406,17 +482,42 @@ app.put('/editEmail/:id', (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
+// Update phoneNumber
+app.put('/editPhoneNumber/:id', (req, res) => {
+
+  console.log("inside edit phonenumber api");
+  console.log('Received body:', req.body);
+
+  const { newPhoneNumber } = req.body;
+  User.findOneAndUpdate({ _id: req.params.id, phoneNumber: { $ne: newPhoneNumber } }, { phoneNumber: newPhoneNumber }, { new: true, runValidators: true })
+    .then(user => {
+      if (user) {
+        res.json(user);
+      } else {
+        res.status(400).json('Email update failed: Email may be in use or not changed.');
+      }
+    })
+    .catch(err => res.status(400).json('Error: ' + err));
+});
+
 //update gold prices 
 app.put('/update-prices', async (req, res) => {
   const { goldPrices } = req.body;
 
+  // Convert the goldPrices array to a map for easier access
+  const goldPricesMap = goldPrices.reduce((acc, price) => {
+    acc[price.karat.toUpperCase()] = parseFloat(price.price);
+    return acc;
+  }, {});
+
   try {
     const items = await GItem.find({});
     const updates = items.map(async item => {
-      console.log(`Updating item with ID ${item._id}: weight = ${item.weight}, carat = ${item.carat}, price per unit = ${goldPrices[item.carat]}`);
+      const caratKey = item.carat.toUpperCase();
+      console.log(`Updating item with ID ${item._id}: weight = ${item.weight}, carat = ${caratKey}, price per unit = ${goldPricesMap[caratKey]}`);
 
       const weight = parseFloat(item.weight);
-      const pricePerUnit = goldPrices[item.carat];
+      const pricePerUnit = goldPricesMap[caratKey];
 
       if (isNaN(weight) || pricePerUnit === undefined) {
         console.error(`Invalid data for item with ID ${item._id}: weight = ${weight}, pricePerUnit = ${pricePerUnit}`);
@@ -424,7 +525,7 @@ app.put('/update-prices', async (req, res) => {
       }
 
       const newPrice = weight * pricePerUnit;
-      return GItem.findByIdAndUpdate(item._id, { $set: { price: newPrice }}, { new: true });
+      return GItem.findByIdAndUpdate(item._id, { $set: { price: newPrice } }, { new: true });
     });
 
     const updatedItems = await Promise.all(updates);

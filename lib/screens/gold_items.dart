@@ -10,37 +10,45 @@ import 'package:project1/widgets/product_card.dart';
 import 'package:project1/widgets/rounded-button1.dart';
 import 'package:video_player/video_player.dart';
 
-class BestPage extends StatefulWidget {
-  const BestPage({
+class GoldItem extends StatefulWidget {
+  const GoldItem({
     super.key,
     required this.category,
-    required this.title, required this.isDiamond,
+    required this.title,
   });
-  final bool isDiamond;
   final String category;
   final String title;
 
-  @override
-  State<BestPage> createState() => _BestPageState();
-
   // @override
-  // State<BestPage> createState() {
-  //   print("RingPage Constructor - Category: ${category}");
-  //   return _BestPageState();
-  // }
+  // State<RingPage> createState() => _RingPageState();
+
+  @override
+  State<GoldItem> createState() {
+    print("GoldItem Constructor - Category: ${category}");
+    return _GoldItemState();
+  }
 }
 
-class _BestPageState extends State<BestPage> {
+class _GoldItemState extends State<GoldItem> {
   late Future<List<Product>> futureProducts;
+  // late Future<List<Product>> futureBest;
 
   @override
   void initState() {
     super.initState();
 
+    // futureProducts = Product.fetchProducts(
+    // widget.category); // Adjust fetchProducts to accept category
     print("widget: " + widget.category);
-
-    futureProducts = Product
-        .fetchBestSellers(); // Use fetchBestSellers when category is 'all'
+    if (widget.category == 'best') {
+      futureProducts = Product
+          .fetchGBestSellers(); // Use fetchBestSellers when category is 'all'
+    } else if (widget.category == 'new') {
+      futureProducts = Product.fetchGNewArrivals();
+    } else {
+      futureProducts = Product.fetchGProducts(
+          widget.category); // Use fetchProducts for other categories
+    }
   }
 
   int _selectedIndex = 0;
@@ -160,8 +168,8 @@ class _BestPageState extends State<BestPage> {
                     mainAxisExtent: 325,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        ProductCard(product: snapshot.data![index], isDiamond: widget.isDiamond),
+                    (context, index) => ProductCard(
+                        product: snapshot.data![index], isDiamond: false),
                     childCount: snapshot.data!.length,
                   ),
                 );

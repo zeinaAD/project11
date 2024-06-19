@@ -176,9 +176,9 @@ class _RoundedButtonState extends State<RoundedButton> {
               MaterialPageRoute(builder: (context) => loginpagee()),
             ); */
           } else if (widget.buttonName == "Login") {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => RingOnHand()),
-            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(builder: (context) => RingOnHand()),
+            // );
             await logIn(
               email: email,
               password: password,
@@ -279,6 +279,7 @@ class _RoundedButtonState extends State<RoundedButton> {
         UserPreferences.setEmail(email);
         UserPreferences.getName(email);
         UserPreferences.getID(email);
+        UserPreferences.getPN(email);
         ////////////////////
 
         if (email == "zeina.fawziad@gmail.com" && password == "1234" ||

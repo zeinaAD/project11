@@ -12,8 +12,9 @@ import 'package:project1/screens/home_page.dart';
 
 class WishlistCard extends StatefulWidget {
   // final wishlistProduct wishlistproduct;
+  final bool isDiamond;
   final Product product;
-  const WishlistCard({super.key, required this.product});
+  const WishlistCard({super.key, required this.product, required this.isDiamond});
 
   @override
   State<WishlistCard> createState() => _WishlistCardState();
@@ -41,7 +42,10 @@ class _WishlistCardState extends State<WishlistCard> {
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductDetails(product: widget.product),
+            builder: (context) => ProductDetails(
+              product: widget.product,
+              isDiamond: widget.isDiamond,
+            ),
           ),
         );
       },
@@ -51,7 +55,10 @@ class _WishlistCardState extends State<WishlistCard> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => ProductDetails(product: widget.product),
+                  builder: (context) => ProductDetails(
+                    product: widget.product,
+                    isDiamond: widget.isDiamond,
+                  ),
                 ),
               );
             },

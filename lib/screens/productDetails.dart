@@ -18,7 +18,10 @@ import 'package:http/http.dart' as http;
 
 class ProductDetails extends StatefulWidget {
   final Product product;
-  const ProductDetails({Key? key, required this.product}) : super(key: key);
+  final bool isDiamond;
+  const ProductDetails(
+      {Key? key, required this.product, required this.isDiamond})
+      : super(key: key);
 
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
@@ -26,6 +29,7 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails>
     with TickerProviderStateMixin {
+  late bool flag;
   double _value = 4;
   //Color _statusColor = kourcolor1;
   int currentindex = 0;
@@ -47,7 +51,8 @@ class _ProductDetailsState extends State<ProductDetails>
   void initState() {
     // TODO: implement initState
     super.initState();
-    futureRelatedProducts = fetchRelatedProducts(widget.product.category);
+    flag = widget.isDiamond;
+    futureRelatedProducts = fetchRelatedProducts(widget.product.category, flag);
   }
 
   void _addReview(String review, int rating) {
@@ -506,7 +511,6 @@ class _ProductDetailsState extends State<ProductDetails>
                             // ),
                             Expanded(
                               child: FutureBuilder<List<Product>>(
-                                
                                 future:
                                     futureRelatedProducts, // Implement this future to fetch data
                                 builder: (context, snapshot) {
@@ -528,7 +532,8 @@ class _ProductDetailsState extends State<ProductDetails>
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: (context, index) {
                                         return ProductCard(
-                                            product: snapshot.data![index]);
+                                            product: snapshot.data![index],
+                                            isDiamond: widget.isDiamond);
                                       },
                                     );
                                   } else {
@@ -562,6 +567,7 @@ class _ProductDetailsState extends State<ProductDetails>
     required String? productId,
   }) async {
     final ipAddress = await getLocalIPv4Address();
+
     final url = Uri.parse('http://$ipAddress:5000/addtoCart');
 
     // Prepare the body before the request
@@ -625,11 +631,23 @@ class _ProductDetailsState extends State<ProductDetails>
     }
   }
 
-  static Future<List<Product>> fetchRelatedProducts(String? category) async {
+//recommended for you
+  static Future<List<Product>> fetchRelatedProducts(
+      String? category, bool flag) async {
     final ipAddress = await getLocalIPv4Address();
+    final response;
+
+    if (!flag) {
+      // if gold
+      response = await http
+          .get(Uri.parse('http://$ipAddress:5000/fetchGItems/$category'));
+    } else {
+      // if diamond
+      response = await http
+          .get(Uri.parse('http://$ipAddress:5000/fetchItems/$category'));
+    }
+
     // Update your API endpoint URL to include the category as a query parameter
-    final response = await http
-        .get(Uri.parse('http://$ipAddress:5000/fetchItems/$category'));
 
     if (response.statusCode == 200) {
       List<Product> products = (json.decode(response.body) as List)

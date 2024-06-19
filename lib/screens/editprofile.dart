@@ -37,7 +37,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     super.initState();
     usernameController.text = UserPreferences.getUserName()!;
     emailController.text = UserPreferences.getEmail()!;
-    // phoneNumberController.text = "+9725994330474";
+    phoneNumberController.text = UserPreferences.getUserPN()!;
     passwordController.text = "87654321";
 
     // futureUsername = editUsername(UserPreferences.getUserID()!,usernameController.text);
@@ -375,6 +375,27 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
       }
     } catch (e) {
       print('Error updating email: $e');
+      // return false;
+    }
+  }
+
+  Future<void> editPhoneNumber(String userId, String newPhoneNumber) async {
+    final ipAddress = await getLocalIPv4Address();
+
+    try {
+      final response = await http.put(
+          Uri.parse('http://$ipAddress:5000/editPhoneNumber/$userId'),
+          body: jsonEncode(<String, String>{'newPhoneNumber': newPhoneNumber}));
+
+      if (response.statusCode == 200) {
+        print('phone number updated successfully.');
+        // return true;
+      } else {
+        print('Failed to update phone number: ${response.body}');
+        //return false;
+      }
+    } catch (e) {
+      print('Error updating phone number: $e');
       // return false;
     }
   }

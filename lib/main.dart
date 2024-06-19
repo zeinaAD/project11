@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:project1/screens/gold_items.dart';
 import 'package:provider/provider.dart';
 import 'package:project1/api/firebase_api.dart';
 import 'package:project1/models/designRings.dart';
@@ -100,9 +101,19 @@ class _MyAppState extends State<MyApp> {
             RingPage(category: 'best', title: '  Our Best Sellers  '),
         'NewArrivalPage': (context) =>
             RingPage(category: 'new', title: '  Our New Ariivals  '),
+        'GoldItem': (context) =>
+            GoldItem(category: 'Ring', title: '    Rings            '),
+            'GNecklacePage': (context) =>
+            GoldItem(category: 'Necklace', title: '   Necklaces      '),
+        'GBraceletPage': (context) =>
+            GoldItem(category: 'Bracelet', title: 'Bracelets       '),
+        'GEarringPage': (context) =>
+            GoldItem(category: 'Earring', title: 'Earings          '),
+            'GSetPage': (context) =>
+            GoldItem(category: 'Set', title: '    Sets            '),
         'chatPage': (context) => Chat(),
-        'ProductDetails': (context) => ProductDetails(product: product),
-        'wishlist': (context) => wishlist(),
+        'ProductDetails': (context) => ProductDetails(product: product, isDiamond: true,),
+        'wishlist': (context) => wishlist(isDiamond: true,),
         'profile': (context) => profile(),
         'Cart': (context) => Cart(),
         'AdminPage': (context) => AdminPage(),

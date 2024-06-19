@@ -43,7 +43,7 @@ class _profileState extends State<profile> {
           // Handle favorite icon tap
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => wishlist()),
+            MaterialPageRoute(builder: (context) => wishlist(isDiamond: true,)),
           );
           break;
         case 3:
