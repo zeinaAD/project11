@@ -8,7 +8,8 @@ class TextInputField extends StatelessWidget {
     required this.hint,
     required this.inputType,
     required this.inputAction,
-    required this.controller, String? validator,
+    required this.controller, 
+    String? validator,
   });
 
   final IconData icon;
@@ -26,10 +27,8 @@ class TextInputField extends StatelessWidget {
         height: size.height * 0.08,
         width: size.width * 0.8,
         decoration: BoxDecoration(
-         //color: Colors.grey[500]?.withOpacity(0.5) ?? Colors.grey[500],
-       // color: kcontentColor?.withOpacity(0.5) ?? kcontentColor,
+
        color: Color(0xA5FFFFFF),
-          //color: Colors.grey[500].withOpacity(0.5),
           borderRadius: BorderRadius.circular(16),
         ),
         child: TextField(

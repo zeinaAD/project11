@@ -31,14 +31,11 @@ class RingPage extends StatefulWidget {
 
 class _RingPageState extends State<RingPage> {
   late Future<List<Product>> futureProducts;
-  // late Future<List<Product>> futureBest;
 
   @override
   void initState() {
     super.initState();
 
-    // futureProducts = Product.fetchProducts(
-    // widget.category); // Adjust fetchProducts to accept category
     print("widget: " + widget.category);
     if (widget.category == 'best') {
       futureProducts = Product

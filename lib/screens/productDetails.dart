@@ -485,30 +485,6 @@ class _ProductDetailsState extends State<ProductDetails>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            // FutureBuilder<List<Product>>(
-                            //   future:
-                            //       futureRelatedProducts, // Make sure you implement this method
-                            //   builder: (context, snapshot) {
-                            //     if (snapshot.connectionState ==
-                            //         ConnectionState.waiting) {
-                            //       return Center(
-                            //           child: CircularProgressIndicator());
-                            //     } else if (snapshot.hasError) {
-                            //       return Text('Error: ${snapshot.error}');
-                            //     } else if (snapshot.hasData) {
-                            //       return SingleChildScrollView(
-                            //         scrollDirection: Axis.horizontal,
-                            //         child: Row(
-                            //           children: snapshot.data!.map((product) {
-                            //             return ProductCard(product: product);
-                            //           }).toList(),
-                            //         ),
-                            //       );
-                            //     } else {
-                            //       return Text('No related products found.');
-                            //     }
-                            //   },
-                            // ),
                             Expanded(
                               child: FutureBuilder<List<Product>>(
                                 future:

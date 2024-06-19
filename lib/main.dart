@@ -27,7 +27,6 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ////////////
   var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
 
   var initSettings = InitializationSettings(
@@ -54,14 +53,6 @@ void main() async {
   await UserPreferences.init();
   await flutterLocalNotificationsPlugin.initialize(initSettings);
   runApp(const MyApp());
-  // await FirebaseApi().initNotifications();
-  //runApp(MyApp());
-  // runApp(
-  //   ChangeNotifierProvider(
-  //     create: (context) => User(),
-  //     child: MyApp(),
-  //   ),
-  // );
 }
 
 class MyApp extends StatefulWidget {
@@ -119,7 +110,6 @@ class _MyAppState extends State<MyApp> {
         'AdminPage': (context) => AdminPage(),
         'ImagePickerPage': (context) => ImagePickerPage(),
 
-        //  'RingFingerDetection': (context) => RingFingerDetection(),
       },
     );
   }

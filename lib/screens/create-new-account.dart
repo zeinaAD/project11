@@ -66,6 +66,7 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
                         inputType: TextInputType.phone,
                         inputAction: TextInputAction.next,
                         controller: phoneNumberController,
+                        validator: _validatePhoneNumber(phoneNumberController.text)
                       ),
 
                       PasswordInput(
@@ -151,6 +152,19 @@ class _CreateNewAccountState extends State<CreateNewAccount> {
     }
     return null;
   }
+
+  String? _validatePhoneNumber(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Please enter your phone number';
+  }
+  // Regular Expression for phone number validation
+  // This regex checks for a sequence of 10-15 digits (which covers most international phone numbers)
+  if (!RegExp(r'^\+?[\d\s]{10,15}$').hasMatch(value)) {
+    return 'Please enter a valid phone number';
+  }
+  return null;
+}
+
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {

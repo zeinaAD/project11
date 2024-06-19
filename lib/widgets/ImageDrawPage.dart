@@ -93,7 +93,7 @@ class _ImageDrawPageState extends State<ImageDrawPage> {
       // Convert cropped image to a format Flutter can display
       Uint8List pngBytes = Uint8List.fromList(img.encodePng(croppedImage));
       setState(() {
-        displayedImage = pngBytes; // Set the state to display the new image
+       //displayedImage = pngBytes; // Set the state to display the new image
       });
     }
     print('Cropped rectangle width in pixels: ${cropRect!.width.toInt() - 7}');
