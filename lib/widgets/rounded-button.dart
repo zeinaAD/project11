@@ -122,6 +122,17 @@ class _RoundedButtonState extends State<RoundedButton> {
     return null;
   }
 
+    String? _validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your phone number';
+    }
+    // Regular Expression for email validation
+    if (!RegExp(r'^\+?[\d\s]{10,15}$').hasMatch(value)) {
+    return 'Please enter a valid phone number';
+  }
+    return null;
+  }
+
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your password';
