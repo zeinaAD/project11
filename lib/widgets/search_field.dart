@@ -10,13 +10,13 @@ class SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 55,
-     // width: double.infinity,
-     width: 275,
-     
+      // width: double.infinity,
+      width: 275,
+
       decoration: BoxDecoration(
         color: kourcolor1,
         borderRadius: BorderRadius.circular(20),
-       // borderRadius: BorderRadius.horizontal(),
+        // borderRadius: BorderRadius.horizontal(),
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: 25,
@@ -34,7 +34,7 @@ class SearchField extends StatelessWidget {
             child: TextField(
               decoration: InputDecoration(
                 hintText: "Search...",
-                hintStyle: TextStyle(color: kcontentColor), 
+                hintStyle: TextStyle(color: kcontentColor),
                 border: InputBorder.none,
               ),
             ),
@@ -45,7 +45,9 @@ class SearchField extends StatelessWidget {
             color: kcontentColor,
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              print("HIIIII");
+            },
             icon: const Icon(
               Icons.keyboard_option_key_sharp,
               color: kcontentColor,

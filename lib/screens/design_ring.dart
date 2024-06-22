@@ -30,14 +30,28 @@ class _DesignRingState extends State<DesignRing> {
   String price = "1500";
   String? id = " ";
   late final Product product;
+  String userID = "";
 
-  late Future<Set<design>> futureDYR;
+  late Future<List<design>> futureDYR;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     futureDYR = design.DYRfetching(widget.name);
+    _initializeDesign();
+  }
+
+  void _initializeDesign() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      setState(() {
+        userID = userId;
+      });
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+    }
   }
 
   @override
@@ -105,7 +119,7 @@ class _DesignRingState extends State<DesignRing> {
         ],
       ),
       backgroundColor: Colors.white,
-      body: FutureBuilder<Set<design>>(
+      body: FutureBuilder<List<design>>(
         future: futureDYR,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -222,11 +236,11 @@ class _DesignRingState extends State<DesignRing> {
                           quantity: 1.toString(),
                           description: "bbb",
                           date: date);
-
-                      id = getLatestItem().toString();
+///////****************************************** */
+                      // id = getLatestItem().toString();
 
                       /////////////////////////////////////////////////
-                      addDesignItemToCart(userId: UserPreferences.getUserID());
+                      addDesignItemToCart(userId: userID);
                     },
                     style: ButtonStyle(
                       backgroundColor:
@@ -515,13 +529,15 @@ class _DesignRingState extends State<DesignRing> {
             child: ElevatedButton(
               onPressed: () async {
                 try {
-                  Set<design> response;
+                  List<design> response;
                   response =
                       await design.DYRfetching("$shape_choice $stone_choice");
                   setState(() {
+                    id = response.first.id;
                     imageUrl = response.first.image;
                     rname = response.first.rname;
                     price = response.first.price;
+                    print("iddd $id");
                   });
                   _scrollController.animateTo(
                     0,

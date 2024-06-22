@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:project1/screens/ring_page.dart';
+import 'package:project1/search/searchItems.dart';
 import 'package:project1/utilities/constants.dart';
 
 class SearchP extends StatefulWidget {
@@ -33,7 +35,11 @@ class _SearchPState extends State<SearchP> {
           children: [
             const SizedBox(width: 10),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => searchItems(),
+                ));
+              },
               iconSize: 30,
               icon: const Icon(
                 Icons.search,
@@ -164,6 +170,13 @@ class _SearchPState extends State<SearchP> {
                           // Handle item 2 tap
                           Navigator.pop(
                               context); // Close the bottom sheet if needed
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => RingPage(
+                              category: "highest",
+                              title: '    Rings            ',
+                            ),
+                          ));
                         },
                       ),
                     ),
@@ -186,6 +199,13 @@ class _SearchPState extends State<SearchP> {
                           // Handle item 2 tap
                           Navigator.pop(
                               context); // Close the bottom sheet if needed
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => RingPage(
+                              category: "lowest",
+                              title: '    Rings            ',
+                            ),
+                          ));
                         },
                       ),
                     ),
@@ -232,6 +252,13 @@ class _SearchPState extends State<SearchP> {
                           // Handle item 2 tap
                           Navigator.pop(
                               context); // Close the bottom sheet if needed
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => RingPage(
+                              category: "newest",
+                              title: '    Rings            ',
+                            ),
+                          ));
                         },
                       ),
                     ),

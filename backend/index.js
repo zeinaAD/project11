@@ -42,6 +42,48 @@ app.get('/fetchItems/:category', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+app.get('/fetchItemsSearch', async (req, res) => {
+  try {
+    const items = await Item.find({  });
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Endpoint to get user ID by email
+app.get('/getUserIdByEmail', async (req, res) => {
+  try {
+    const email = req.query.email;
+    const user = await User.findOne({ email });
+
+    if (user) {
+      res.status(200).json({ userId: user._id });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Failed to fetch user ID:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch product details by _id
+app.get('/fetchProductDetails/:id', async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const item = await Item.findById(itemId);
+
+    if (item) {
+      res.status(200).json(item);
+    } else {
+      res.status(404).json({ message: 'Item not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 const Wishlist = require('./models/wishlist');
 app.get('/fetchWishlistItems/:id', async (req, res) => {
@@ -50,7 +92,7 @@ app.get('/fetchWishlistItems/:id', async (req, res) => {
     const wishlist = await Wishlist.findOne({ userId: userId });
 
     if (!wishlist) {
-      return res.status(404).send('no Wishlist found');
+      return res.json('No items added to wishlist');
     }
 
     const items = await Promise.all(
@@ -85,13 +127,14 @@ app.get('/fetchWishlistItems/:id', async (req, res) => {
 
 const DYRItem = require('./models/DYRitem');
 
+// Endpoint to fetch items by name
 app.get('/fetchDYR/:name', async (req, res) => {
   try {
     const name = req.params.name;
     console.log('Searching for:', name); // Debug: Log the name being searched
-    const dyritem = await DYRItem.findOne({ name: name });
+    const dyritem = await DYRItem.find({ name: name });
 
-    if (dyritem) {
+    if (dyritem.length > 0) {
       res.status(200).json(dyritem);
     } else {
       res.status(404).json({ message: 'Item not found' });
@@ -181,19 +224,17 @@ app.get('/getPhoneNumber/:email', async (req, res) => {
 
 
 const Cart = require('./models/cart');
+// Endpoint to fetch cart items with details from three collections
 app.get('/fetchCartItems/:userId', async (req, res) => {
-
   try {
     const userId = req.params.userId;
     const cart = await Cart.findOne({ userId: userId });
 
-
     if (!cart) {
-      return res.status(404).json({ message: "No cart found for this user." });
+      return res.json({ message: "Cart is empty" });
     }
 
     // Fetching product details for each item in the cart
-
     const itemsWithDetails = await Promise.all(
       cart.items.map(async item => {
         if (!mongoose.Types.ObjectId.isValid(item.productId)) {
@@ -204,58 +245,111 @@ app.get('/fetchCartItems/:userId', async (req, res) => {
             productSize: 'N/A',
             productQuantity: item.quantity,
             productImage: item.image || 'default_image.jpg', // Provide a default if none
-            productName: item.name,
           };
         }
+
         let product = await Item.findById(item.productId);
         if (!product) {
           product = await GItem.findById(item.productId);
         }
+        if (!product) {
+          product = await DYRItem.findById(item.productId);
+        }
 
-        // const product = await Item.findById(item.productId);
         if (!product) {
           return {
-            //...item._doc,  // Spread operator to include all cart item properties
             ...item,
-            productId: item.productId,//
+            productId: item.productId,
             productName: "Product not found",
             productPrice: 0,
             productSize: item.size || 'N/A',  // Default to 'N/A' if size is undefined
             productQuantity: item.quantity,
-            productImage: item.image,
-            productName: item.name,
+            productImage: item.image || 'default_image.jpg', // Provide a default image if not available
           };
         }
+
         return {
-          //...item._doc,  // Include other cart item properties like size, etc.
-          ...product._doc,
-          productId: product.id,///
+          ...item,
+          productId: product._id,
           productName: product.name,
           productPrice: product.price,
           productSize: item.size || 'N/A',  // Use size from the cart, default to 'N/A' if not available
           productQuantity: item.quantity,
           productImage: product.image,
-          productName: product.name,
-
         };
-
       })
     );
+
     // Construct the response object with cart details and the enhanced items array
     const response = {
       cartId: cart._id,
       userId: cart.userId,
       created_at: cart.created_at,
       updated_at: cart.updated_at,
-      items: itemsWithDetails
+      items: itemsWithDetails,
     };
-    // console.log(response);
 
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+
+// Endpoint to calculate the total price of items in the cart
+app.get('/calculateTotalPrice/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const cart = await Cart.findOne({ userId: userId });
+
+    if (!cart) {
+      return res.status(200).json({ totalPrice: 0 });
+    }
+
+    let totalPrice = 0;
+
+    // Calculating the total price directly from the cart items
+    cart.items.forEach(item => {
+      totalPrice += item.price * item.quantity;
+    });
+
+    res.status(200).json({ totalPrice: totalPrice });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//fetch shipping Info:
+const Shipping = require('./models/shipping');
+app.get('/getShippingInfo/:userId', (req, res) => {
+  const userId = req.params.userId;
+
+  Shipping.findOne({ user_id: userId })
+    .then(shipping => {
+      if (shipping) {
+        res.json(shipping);
+      } else {
+        res.status(404).json({ message: 'Shipping information not found' });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Error fetching shipping information', error: err });
+    });
+});
+
+
+app.get('/fetchUsersExcluding/:email', async (req, res) => {
+  const emailToExclude = req.params.email;
+  
+  try {
+    const users = await User.find({ email: { $ne: emailToExclude } });
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 //fetch orders of one user  
 // const Order = require('./models/order');
@@ -367,11 +461,12 @@ app.get('/fetchGNewArrivals', async (req, res) => {
   }
 });
 
-//newest items
-app.get('/fetchNewestItems', async (req, res) => {
+// Fetch newest items by category
+app.get('/fetchNewestItems/:category', async (req, res) => {
   try {
-    // Fetch items and sort them by 'createdAt' in descending order
-    const items = await Item.find().sort({ date: -1 });
+    const category = req.params.category;
+    const items = await Item.find({ category }).sort({ date: -1 });
+
     res.status(200).json(items);
   } catch (error) {
     console.error('Failed to fetch items:', error);
@@ -379,11 +474,12 @@ app.get('/fetchNewestItems', async (req, res) => {
   }
 });
 
-//highest price 
-app.get('/fetchItemsByHighestPrice', async (req, res) => {
+// Fetch items by highest price in a specific category
+app.get('/fetchItemsByHighestPrice/:category', async (req, res) => {
   try {
-    // Fetch items and sort them by 'price' in descending order
-    const items = await Item.find().sort({ price: -1 });
+    const category = req.params.category;
+    const items = await Item.find({ category }).sort({ price: -1 });
+
     res.status(200).json(items);
   } catch (error) {
     console.error('Failed to fetch items:', error);
@@ -391,11 +487,12 @@ app.get('/fetchItemsByHighestPrice', async (req, res) => {
   }
 });
 
-//lowest price
-app.get('/fetchItemsByLowestPrice', async (req, res) => {
+// Fetch items by lowest price in a specific category
+app.get('/fetchItemsByLowestPrice/:category', async (req, res) => {
   try {
-    // Fetch items and sort them by 'price' in ascending order
-    const items = await Item.find().sort({ price: 1 });
+    const category = req.params.category;
+    const items = await Item.find({ category }).sort({ price: 1 });
+
     res.status(200).json(items);
   } catch (error) {
     console.error('Failed to fetch items:', error);
@@ -453,51 +550,287 @@ app.get('/searchItemsByDescription', async (req, res) => {
   }
 });
 
+//////////////////////////
+// Fetch Diamond percentage of each item category
+app.get('/fetchDiamondPercentages', async (req, res) => {
+  try {
+    console.log("Fetching item percentages");
+
+    const totalItems = await Item.countDocuments({});
+    const categories = await Item.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          category: "$_id",
+          percentage: { $multiply: [{ $divide: ["$count", totalItems] }, 100] }
+        }
+      }
+    ]);
+
+    const formattedCategories = categories.map(item => ({
+      category: item.category,
+      percentage: parseFloat(item.percentage.toFixed(1))
+    }));
+
+    res.status(200).json(formattedCategories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch Gold percentage of each item category
+app.get('/fetchGoldPercentages', async (req, res) => {
+  try {
+    console.log("Fetching item percentages");
+
+    const totalItems = await GItem.countDocuments({});
+    const categories = await GItem.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          category: "$_id",
+          percentage: { $multiply: [{ $divide: ["$count", totalItems] }, 100] }
+        }
+      }
+    ]);
+
+    const formattedCategories = categories.map(item => ({
+      category: item.category,
+      percentage: parseFloat(item.percentage.toFixed(1))
+    }));
+
+    res.status(200).json(formattedCategories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch total amount of each item category
+app.get('/fetchTotalAmounts', async (req, res) => {
+  try {
+    console.log("Fetching total amounts of each category");
+
+    const totals = await Item.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$quantity" }
+        }
+      },
+      {
+        $project: {
+          category: "$_id",
+          totalAmount: 1
+        }
+      }
+    ]);
+
+    res.status(200).json(totals);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch total Gold amount of each item category
+app.get('/fetchTotalGoldAmounts', async (req, res) => {
+  try {
+    console.log("Fetching total amounts of each category");
+
+    const totals = await GItem.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$quantity" }
+        }
+      },
+      {
+        $project: {
+          category: "$_id",
+          totalAmount: 1
+        }
+      }
+    ]);
+
+    res.status(200).json(totals);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch categorized item counts
+app.get('/fetchItemCounts', async (req, res) => {
+  try {
+    console.log("Fetching items count of each category");
+    const orders = await Order.find();
+
+    // Flatten all items from all orders into a single array
+    const allItems = orders.flatMap(order => order.items);
+
+    // Get product categories
+    const productIds = allItems.map(item => item.product_id);
+    const products = await Item.find({ _id: { $in: productIds } });
+
+    // Create a map of product_id to category
+    const productCategoryMap = products.reduce((acc, product) => {
+      acc[product._id] = product.category;
+      return acc;
+    }, {});
+
+    // Count items per category
+    const categoryCounts = allItems.reduce((acc, item) => {
+      const category = productCategoryMap[item.product_id] || 'Unknown';
+      if (!acc[category]) {
+        acc[category] = 0;
+      }
+      acc[category] += item.quantity;
+      return acc;
+    }, {});
+
+    // Convert to array format
+    const result = Object.keys(categoryCounts).map(category => ({
+      category,
+      count: categoryCounts[category]
+    }));
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 //update username
 app.put('/editUsername/:id', (req, res) => {
   console.log("inside edit username api");
   console.log('Received body:', req.body);
+
   const { newUsername } = req.body;
-  User.findByIdAndUpdate(req.params.id, { username: newUsername }, { new: true })
-    .then(user => res.json(user))
-    .catch(err => res.status(400).json('Error: ' + err));
+
+  if (!newUsername) {
+    return res.status(400).json('Error: newUsername is required');
+  }
+
+  User.findByIdAndUpdate(
+    req.params.id,
+    { username: newUsername },
+    { new: true, runValidators: true }
+  )
+    .then(user => {
+      if (user) {
+        console.log('Username updated:', user);
+        res.json(user);
+      } else {
+        console.log('Username update failed.');
+        res.status(400).json('Username update failed.');
+      }
+    })
+    .catch(err => {
+      console.log('Error:', err);
+      res.status(400).json('Error: ' + err);
+    });
 });
 
 // Update email
 app.put('/editEmail/:id', (req, res) => {
-
   console.log("inside edit email api");
   console.log('Received body:', req.body);
 
   const { newEmail } = req.body;
-  User.findOneAndUpdate({ _id: req.params.id, email: { $ne: newEmail } }, { email: newEmail }, { new: true, runValidators: true })
+
+  if (!newEmail) {
+    return res.status(400).json('Error: newEmail is required');
+  }
+
+  User.findOneAndUpdate(
+    { _id: req.params.id, email: { $ne: newEmail } },
+    { email: newEmail },
+    { new: true, runValidators: true }
+  )
     .then(user => {
       if (user) {
+        console.log('Email updated:', user);
         res.json(user);
       } else {
+        console.log('Email update failed: Email may be in use or not changed.');
         res.status(400).json('Email update failed: Email may be in use or not changed.');
       }
     })
-    .catch(err => res.status(400).json('Error: ' + err));
+    .catch(err => {
+      console.log('Error:', err);
+      res.status(400).json('Error: ' + err);
+    });
 });
 
 // Update phoneNumber
 app.put('/editPhoneNumber/:id', (req, res) => {
-
   console.log("inside edit phonenumber api");
   console.log('Received body:', req.body);
 
   const { newPhoneNumber } = req.body;
-  User.findOneAndUpdate({ _id: req.params.id, phoneNumber: { $ne: newPhoneNumber } }, { phoneNumber: newPhoneNumber }, { new: true, runValidators: true })
+
+  if (!newPhoneNumber) {
+    return res.status(400).json('Error: newPhoneNumber is required');
+  }
+
+  User.findOneAndUpdate(
+    { _id: req.params.id, phoneNumber: { $ne: newPhoneNumber } },
+    { phoneNumber: newPhoneNumber },
+    { new: true, runValidators: true }
+  )
     .then(user => {
       if (user) {
+        console.log('Phone number updated:', user);
         res.json(user);
       } else {
-        res.status(400).json('Email update failed: Email may be in use or not changed.');
+        console.log('Phone number update failed: Phone number may be in use or not changed.');
+        res.status(400).json('Phone number update failed: Phone number may be in use or not changed.');
       }
     })
-    .catch(err => res.status(400).json('Error: ' + err));
+    .catch(err => {
+      console.log('Error:', err);
+      res.status(400).json('Error: ' + err);
+    });
+});
+
+//update password
+app.put('/editPassword/:id', (req, res) => {
+  console.log("inside edit password api");
+  console.log('Received body:', req.body);
+
+  const { newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).json('Error: newPassword is required');
+  }
+
+  User.findByIdAndUpdate(
+    req.params.id,
+    { password: newPassword },
+    { new: true, runValidators: true }
+  )
+    .then(user => {
+      if (user) {
+        console.log('Password updated:', user);
+        res.json(user);
+      } else {
+        console.log('Password update failed.');
+        res.status(400).json('Password update failed.');
+      }
+    })
+    .catch(err => {
+      console.log('Error:', err);
+      res.status(400).json('Error: ' + err);
+    });
 });
 
 //update gold prices 

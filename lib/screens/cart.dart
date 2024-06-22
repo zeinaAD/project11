@@ -17,46 +17,92 @@ class Cart extends StatefulWidget {
 }
 
 class _CartState extends State<Cart> {
-  double _totalPrice = 0.0;
+  double totalPrice = 0.0;
   late List<CartItem> cartItems;
+  String userID = "";
 
   @override
   void initState() {
     super.initState();
-    futureCartItems = fetchCartItem(UserPreferences.getUserID());
-    futureCartItems.then((_) => _calculateTotalPrice());
+    futureCartItems = Future.value([]);
+    _initializeWishlist();
+    //futureCartItems = fetchCartItem(UserPreferences.getUserID());
+    //futureCartItems.then((_) => _calculateTotalPrice());
   }
 
-  void _calculateTotalPrice() async {
-    try {
-      List<dynamic> cartItemsJson =
-          await fetchCartItem(UserPreferences.getUserID());
-      cartItems = cartItemsJson.map((itemJson) {
-        int parsedPrice =
-            int.tryParse(itemJson['productPrice'].toString()) ?? 0;
-        int parsedQuantity =
-            int.tryParse(itemJson['productQuantity'].toString()) ?? 0;
-        return CartItem(
-          name: itemJson['productName'],
-          price: parsedPrice,
-          quantity: parsedQuantity,
-          productId: itemJson['productId'],
-        );
-      }).toList();
-
-      double totalPrice = cartItems.fold(0.0,
-          (previousValue, item) => previousValue + item.price * item.quantity);
-
+  void _initializeWishlist() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
       setState(() {
-        _totalPrice = totalPrice;
+        futureCartItems = fetchCartItem(userId);
+        userID = userId;
+        fetchTotalPrice(userId);
       });
-    } catch (e) {
-      print('Error calculating total price: $e');
-      setState(() {
-        _totalPrice = 0.0; // Reset or handle error state
-      });
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
     }
   }
+
+  Future<void> fetchTotalPrice(String userId) async {
+    final ipAddress =
+        await getLocalIPv4Address(); // Implement this method to get the local IP address
+    final url = 'http://$ipAddress:5000/calculateTotalPrice/$userId';
+    print('Requesting: $url'); // Debug: log the URL being requested
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      print(
+          'Status code: ${response.statusCode}'); // Debug: log the status code
+      print(
+          'Response Body: ${response.body}'); // Debug: log the full response body
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          totalPrice = (jsonResponse['totalPrice'] as num).toDouble();
+        });
+
+        // return jsonResponse['totalPrice']
+        //     .toDouble(); // Convert the total price to double
+      } else {
+        throw Exception(
+            'Failed to load total price, Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      throw Exception('An error occurred: $e');
+    }
+  }
+  // void _calculateTotalPrice() async {
+  //   try {
+  //     List<dynamic> cartItemsJson = await fetchCartItem(userID);
+  //     cartItems = cartItemsJson.map((itemJson) {
+  //       int parsedPrice =
+  //           int.tryParse(itemJson['productPrice'].toString()) ?? 0;
+  //       int parsedQuantity =
+  //           int.tryParse(itemJson['productQuantity'].toString()) ?? 0;
+  //       return CartItem(
+  //         name: itemJson['productName'],
+  //         price: parsedPrice,
+  //         quantity: parsedQuantity,
+  //         productId: itemJson['productId'],
+  //       );
+  //     }).toList();
+
+  //     double totalPrice = cartItems.fold(0.0,
+  //         (previousValue, item) => previousValue + item.price * item.quantity);
+
+  //     setState(() {
+  //       _totalPrice = totalPrice;
+  //     });
+  //   } catch (e) {
+  //     print('Error calculating total price: $e');
+  //     setState(() {
+  //       _totalPrice = 0.0; // Reset or handle error state
+  //     });
+  //   }
+  // }
 
   late Future<List<dynamic>> futureCartItems;
 
@@ -113,6 +159,7 @@ class _CartState extends State<Cart> {
                   ),
                   trailing: Text(
                       '\$${(item['productPrice'] * item['productQuantity']).toString()}'), // Product price
+                      
                 );
               },
             );
@@ -130,7 +177,7 @@ class _CartState extends State<Cart> {
             children: [
               Expanded(
                 child: Text(
-                  'Total: \$${_totalPrice.toStringAsFixed(2)}',
+                  'Total: \$${totalPrice.toStringAsFixed(2)}',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -168,11 +215,16 @@ class _CartState extends State<Cart> {
           .get(Uri.parse('http://$ipAddress:5000/fetchCartItems/$userId'));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response
-            .body); // Assuming the response body is already the items array
+        final data = json.decode(response.body);
+
+        if (data is Map<String, dynamic> &&
+            data.containsKey('message') &&
+            data['message'] == 'Cart is empty') {
+          print('Cart is empty');
+          return []; // Return an empty list if the cart is empty
+        }
 
         print(data); // Check the simplified structure
-
         return data['items'];
       } else {
         throw Exception(

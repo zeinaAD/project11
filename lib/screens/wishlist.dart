@@ -22,9 +22,24 @@ class _wishlistState extends State<wishlist> {
   @override
   void initState() {
     super.initState();
+    futureWishlist = Future.value([]); // Initialize with an empty list
+    _initializeWishlist();
+    // String? email = UserPreferences.getEmail();
 
-    futureWishlist = fetchWishlistItem(
-        UserPreferences.getUserID()); // Use fetchProducts for other categories
+    // futureWishlist = fetchWishlistItem(UserPreferences.getUserIdByEmail(email!)
+    //     as String?); // Use fetchProducts for other categories
+  }
+
+  void _initializeWishlist() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      setState(() {
+        futureWishlist = fetchWishlistItem(userId);
+      });
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+    }
   }
 
   Widget build(BuildContext context) {
@@ -127,24 +142,35 @@ class _wishlistState extends State<wishlist> {
 
   Future<List<dynamic>> fetchWishlistItem(String? userId) async {
     final ipAddress = await getLocalIPv4Address();
+    print("User ID: $userId");
+    print("User Email: ${UserPreferences.getEmail()}");
+
     try {
       final response = await http
           .get(Uri.parse('http://$ipAddress:5000/fetchWishlistItems/$userId'));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response
-            .body); // Assuming the response body is already the items array
+        final data = json.decode(response.body);
 
-        print(data); // Check the simplified structure
+        if (data is String && data == 'No items added to wishlist') {
+          print('No items added to wishlist');
+          return []; // Return an empty list if the wishlist is empty
+        }
 
-        return data;
+        if (data is List<dynamic>) {
+          print(data); // Check the simplified structure
+          return data;
+        } else {
+          print('Unexpected data format: $data');
+          return [];
+        }
       } else {
         throw Exception(
             'Failed to load wishlist products, Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching wishlist items: $e');
-      throw Exception('Failed to load wishlist products: $e');
+      return []; // Return an empty list in case of an error
     }
   }
 }

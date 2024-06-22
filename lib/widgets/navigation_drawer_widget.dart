@@ -7,6 +7,7 @@ import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/login1.dart';
 import 'package:project1/screens/notification.dart';
 import 'package:project1/screens/wishlist.dart';
+import 'package:project1/search/searchItems.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:project1/widgets/UserPreferences.dart';
 
@@ -148,8 +149,9 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
 
   Widget buildSearchField() {
     final color = Colors.white;
+    final FocusNode _focusNode = FocusNode();
 
-    return TextField(
+    return TextFormField(
       style: TextStyle(color: color),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -167,6 +169,14 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
           borderSide: BorderSide(color: color.withOpacity(0.7)),
         ),
       ),
+      onTap: () async {
+        print("hiii***************");
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => searchItems(),
+        ));
+      },
+      // Assign the FocusNode to the TextField
+      focusNode: _focusNode,
     );
   }
 
@@ -197,7 +207,9 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 1:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => wishlist(isDiamond: true,),
+          builder: (context) => wishlist(
+            isDiamond: true,
+          ),
         ));
         break;
       case 2:
@@ -212,7 +224,10 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
         break;
       case 4:
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => Chat(),
+          builder: (context) => Chat(
+            isAdmin: false,
+            userId: "",
+          ),
         ));
         break;
       case 5:

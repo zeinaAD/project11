@@ -9,6 +9,7 @@ import 'package:project1/ipaddress.dart';
 
 class design {
   //final String title;
+  final String id;
   final String image;
   final String price;
   final String rname;
@@ -17,6 +18,7 @@ class design {
 
   design({
     // required this.title,
+    required this.id,
     required this.image,
     required this.price,
     required this.rname,
@@ -26,6 +28,7 @@ class design {
 
   factory design.fromJson(Map<String, dynamic> json) {
     return design(
+      id: json['_id'],
       image: json['image'],
       price: json['price'],
       rname: json['rname'],
@@ -33,9 +36,9 @@ class design {
     );
   }
 
-  static Future<Set<design>> DYRfetching(String name) async {
+  static Future<List<design>> DYRfetching(String name) async {
     final ipAddress =
-        await getLocalIPv4Address(); // This function should return the IP address.
+        await getLocalIPv4Address(); // Implement this method to get the local IP address
     final url = 'http://$ipAddress:5000/fetchDYR/$name';
     print('Requesting: $url'); // Debug: log the URL being requested
 
@@ -47,25 +50,9 @@ class design {
           'Response Body: ${response.body}'); // Debug: log the full response body
 
       if (response.statusCode == 200) {
-        var jsonResponse = json.decode(response.body);
-
-        // Ensure the jsonResponse is a Map and contains both 'image' and 'price' keys.
-        if (jsonResponse.containsKey('image') &&
-            jsonResponse.containsKey('price')) {
-          return {
-            design.fromJson(jsonResponse)
-            /*  design(
-              image: jsonResponse['image'],
-              price: jsonResponse['price'],
-              rname: jsonResponse['rname'],
-              //  menuArr:
-            ) */
-          };
-        } else {
-          print('Error: Necessary keys not found in the response.');
-          throw Exception(
-              'Necessary keys ("image" and/or "price") not found in the JSON response.');
-        }
+        List<dynamic> jsonResponse = json.decode(response.body);
+        // Ensure the jsonResponse is a List
+        return jsonResponse.map((item) => design.fromJson(item)).toList();
       } else {
         throw Exception(
             'Failed to load data, Status code: ${response.statusCode}');

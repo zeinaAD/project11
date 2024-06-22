@@ -14,4 +14,15 @@ class ShippingInfo {
     required this.zipCode,
     required this.phoneNumber,
   });
+
+  factory ShippingInfo.fromJson(Map<String, dynamic> json) {
+    return ShippingInfo(
+      name: json['name'],
+      address: json['address'],
+      city: json['city'],
+      state: json['state'],
+      zipCode: json['zipCode'],
+      phoneNumber: json['phoneNumber'],
+    );
+  }
 }

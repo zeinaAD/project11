@@ -102,7 +102,7 @@ class _MyAppState extends State<MyApp> {
             GoldItem(category: 'Earring', title: 'Earings          '),
             'GSetPage': (context) =>
             GoldItem(category: 'Set', title: '    Sets            '),
-        'chatPage': (context) => Chat(),
+        'chatPage': (context) => Chat(isAdmin: false,userId: "",),
         'ProductDetails': (context) => ProductDetails(product: product, isDiamond: true,),
         'wishlist': (context) => wishlist(isDiamond: true,),
         'profile': (context) => profile(),

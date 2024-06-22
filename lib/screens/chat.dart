@@ -4,15 +4,44 @@ import 'package:project1/utilities/constants.dart';
 import 'package:project1/widgets/UserPreferences.dart';
 
 class Chat extends StatefulWidget {
-  const Chat({super.key});
+  const Chat({super.key, required this.isAdmin, required this.userId});
+  final bool isAdmin;
+  final String userId;
 
   @override
   State<Chat> createState() => _ChatState();
 }
 
 class _ChatState extends State<Chat> {
+  bool isSentByMe = false;
   final TextEditingController _messageController = TextEditingController();
   final String chatId = "your_chat_id"; // Replace with actual chat ID
+  String userID = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeUserId();
+  }
+
+  void _initializeUserId() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      try {
+        if (mounted) {
+          setState(() {
+            userID = userId;
+          });
+        }
+      } catch (e) {
+        // Handle error, possibly show a message to the user
+        print('Failed to fetch user ID: $e');
+      }
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+    }
+  }
 
   @override
   void dispose() {
@@ -22,14 +51,70 @@ class _ChatState extends State<Chat> {
 
   Future<void> sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await FirebaseFirestore.instance
-          .collection('chats/$chatId/messages')
-          .add({
-        'text': _messageController.text,
-        'date': FieldValue.serverTimestamp(),
-        'isSentByMe': true, // Assuming this message is sent by the current user
-      });
+      String receiverId = "66080ee484e59b5ef1fb7423";
+      if (!widget.isAdmin) {
+        await FirebaseFirestore.instance
+            .collection('chatss')
+            .doc(userID)
+            .collection(receiverId)
+            .add({
+          'text': _messageController.text,
+          'date': FieldValue.serverTimestamp(),
+          'isSentByMe': true,
+        });
+        await FirebaseFirestore.instance
+            .collection('chatss')
+            .doc(receiverId)
+            .collection(userID)
+            .add({
+          'text': _messageController.text,
+          'date': FieldValue.serverTimestamp(),
+          'isSentByMe': false,
+        });
+      } else {
+        await FirebaseFirestore.instance
+            .collection('chatss')
+            .doc(receiverId)
+            .collection(widget.userId)
+            .add({
+          'text': _messageController.text,
+          'date': FieldValue.serverTimestamp(),
+          'isSentByMe': true,
+        });
+        await FirebaseFirestore.instance
+            .collection('chatss')
+            .doc(widget.userId)
+            .collection(receiverId)
+            .add({
+          'text': _messageController.text,
+          'date': FieldValue.serverTimestamp(),
+          'isSentByMe': false,
+        });
+      }
       _messageController.clear();
+    }
+  }
+
+  Stream<List<Message>> getMessages(String userID) {
+    String receiverId = "66080ee484e59b5ef1fb7423";
+    if (!widget.isAdmin) {
+      return FirebaseFirestore.instance
+          .collection('chatss')
+          .doc(userID)
+          .collection(receiverId)
+          .orderBy('date', descending: false)
+          .snapshots()
+          .map((snapshot) =>
+              snapshot.docs.map((doc) => Message.fromSnapshot(doc)).toList());
+    } else {
+      return FirebaseFirestore.instance
+          .collection('chatss')
+          .doc(receiverId)
+          .collection(widget.userId)
+          .orderBy('date', descending: false)
+          .snapshots()
+          .map((snapshot) =>
+              snapshot.docs.map((doc) => Message.fromSnapshot(doc)).toList());
     }
   }
 
@@ -57,27 +142,29 @@ class _ChatState extends State<Chat> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: getMessages(chatId),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                var messages = snapshot.data!;
-                return ListView.builder(
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    return ChatMessage(
-                      message: messages[index].text,
-                      isSentByMe: messages[index].isSentByMe,
-                    );
-                  },
-                );
-              },
-            ),
+            child: userID.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : StreamBuilder<List<Message>>(
+                    stream: getMessages(userID),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+                      if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      var messages = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          return ChatMessage(
+                            message: messages[index].text,
+                            isSentByMe: messages[index].isSentByMe,
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -112,15 +199,6 @@ class _ChatState extends State<Chat> {
       ),
     );
   }
-
-  Stream<List<Message>> getMessages(String chatId) {
-    return FirebaseFirestore.instance
-        .collection('chats/$chatId/messages')
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Message.fromSnapshot(doc)).toList());
-  }
 }
 
 class Message {
@@ -135,11 +213,10 @@ class Message {
       required this.date,
       required this.isSentByMe});
 
-  factory Message.fromSnapshot(
-      QueryDocumentSnapshot<Map<String, dynamic>> snapshot) {
-    var json = snapshot.data();
+  factory Message.fromSnapshot(DocumentSnapshot doc) {
+    var json = doc.data() as Map<String, dynamic>;
     return Message(
-      id: snapshot.id,
+      id: doc.id,
       text: json['text'] as String,
       date: (json['date'] as Timestamp).toDate(),
       isSentByMe: json['isSentByMe'] as bool,

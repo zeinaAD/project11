@@ -21,6 +21,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
   bool iseditingEmail = false;
   bool iseditingPhoneNumber = false;
   bool iseditingPassword = false;
+  String userID = "";
 
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -39,8 +40,23 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     emailController.text = UserPreferences.getEmail()!;
     phoneNumberController.text = UserPreferences.getUserPN()!;
     passwordController.text = "87654321";
+    _initializeWishlist();
 
     // futureUsername = editUsername(UserPreferences.getUserID()!,usernameController.text);
+  }
+
+  void _initializeWishlist() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      if (mounted) {
+        setState(() {
+          userID = userId;
+        });
+      }
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+    }
   }
 
   @override
@@ -65,8 +81,8 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
               String? username = usernameController.text;
               String? id = UserPreferences.getUserID();
               String? email = emailController.text;
-              await editUsername(id!, username);
-              await editEmail(id, email);
+              // await editUsername(id!, username);
+              // await editEmail(id, email);
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -109,6 +125,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                 () {
               setState(() {
                 if (iseditingUsername) {
+                  editUsername(userID, usernameController.text);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -133,6 +150,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
             editfield('Email', iseditingEmail, emailController, false, () {
               setState(() {
                 if (iseditingEmail) {
+                  editEmail(userID, emailController.text);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -158,6 +176,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                 phoneNumberController, false, () {
               setState(() {
                 if (iseditingPhoneNumber) {
+                  editPhoneNumber(userID, phoneNumberController.text);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -185,6 +204,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                 if (iseditingPassword) {
                   if (newpasswordController.text ==
                       confirmPasswordController.text) {
+                    editPassword(userID, newpasswordController.text);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -341,19 +361,21 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
     try {
       final response = await http.put(
-          Uri.parse('http://$ipAddress:5000/editUsername/$userId'),
-          body: jsonEncode(<String, String>{'newUsername': newUsername}));
+        Uri.parse('http://$ipAddress:5000/editUsername/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{'newUsername': newUsername}),
+      );
 
       if (response.statusCode == 200) {
+        UserPreferences.setUserName(newUsername);
         print('Username updated successfully.');
-        // return true;
       } else {
         print('Failed to update username: ${response.body}');
-        //return false;
       }
     } catch (e) {
       print('Error updating username: $e');
-      // return false;
     }
   }
 
@@ -363,40 +385,69 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     try {
       final response = await http.put(
         Uri.parse('http://$ipAddress:5000/editEmail/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode(<String, String>{'newEmail': newEmail}),
       );
 
       if (response.statusCode == 200) {
-        print('email updated successfully.');
-        // return true;
+        UserPreferences.setEmail(newEmail);
+        print('Email updated successfully.');
       } else {
         print('Failed to update email: ${response.body}');
-        //return false;
       }
     } catch (e) {
       print('Error updating email: $e');
-      // return false;
     }
   }
 
   Future<void> editPhoneNumber(String userId, String newPhoneNumber) async {
     final ipAddress = await getLocalIPv4Address();
+    print("userr id: $userID");
 
     try {
       final response = await http.put(
-          Uri.parse('http://$ipAddress:5000/editPhoneNumber/$userId'),
-          body: jsonEncode(<String, String>{'newPhoneNumber': newPhoneNumber}));
+        Uri.parse('http://$ipAddress:5000/editPhoneNumber/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{'newPhoneNumber': newPhoneNumber}),
+      );
 
       if (response.statusCode == 200) {
-        print('phone number updated successfully.');
+        UserPreferences.setUserPN(newPhoneNumber);
+        print('Phone number updated successfully.');
         // return true;
       } else {
         print('Failed to update phone number: ${response.body}');
-        //return false;
+        // return false;
       }
     } catch (e) {
       print('Error updating phone number: $e');
       // return false;
+    }
+  }
+
+  Future<void> editPassword(String userId, String newPassword) async {
+    final ipAddress = await getLocalIPv4Address();
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://$ipAddress:5000/editPassword/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{'newPassword': newPassword}),
+      );
+
+      if (response.statusCode == 200) {
+        print('Password updated successfully.');
+      } else {
+        print('Failed to update password: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating password: $e');
     }
   }
 }

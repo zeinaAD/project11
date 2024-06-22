@@ -1,16 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:project1/ipaddress.dart';
 import 'package:project1/main.dart';
+import 'package:project1/models/ShippingInfo.dart';
 import 'package:project1/screens/add_review.dart';
 import 'package:project1/screens/cart.dart';
 import 'package:project1/screens/diamond_page.dart';
 import 'package:project1/screens/editprofile.dart';
 import 'package:project1/screens/home_page.dart';
+import 'package:project1/screens/order_review.dart';
 import 'package:project1/screens/shipping_info.dart';
 import 'package:project1/screens/wishlist.dart';
 import 'package:project1/utilities/constants.dart';
 import 'package:project1/widgets/UserPreferences.dart';
 import 'package:project1/widgets/navigation_drawer_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class profile extends StatefulWidget {
   const profile({super.key});
@@ -21,6 +27,46 @@ class profile extends StatefulWidget {
 
 class _profileState extends State<profile> {
   int _selectedIndex = 0;
+  late final ShippingInfo shipping;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeShipping();
+  }
+
+  void _initializeShipping() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      try {
+        ShippingInfo fetchedShipping = await fetchShippingInfo(userId);
+        if (mounted) {
+          setState(() {
+            shipping = fetchedShipping;
+          });
+        }
+      } catch (e) {
+        // Handle error, possibly show a message to the user
+        print('Failed to fetch shipping info: $e');
+      }
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+    }
+  }
+
+  Future<ShippingInfo> fetchShippingInfo(String userId) async {
+    final ipAddress =
+        await getLocalIPv4Address(); // Implement this method to get the local IP address
+    final url = 'http://$ipAddress:5000/getShippingInfo/$userId';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return ShippingInfo.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load shipping information');
+    }
+  }
 
   void _navigateBottomBar(int index) {
     setState(() {
@@ -43,7 +89,10 @@ class _profileState extends State<profile> {
           // Handle favorite icon tap
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => wishlist(isDiamond: true,)),
+            MaterialPageRoute(
+                builder: (context) => wishlist(
+                      isDiamond: true,
+                    )),
           );
           break;
         case 3:
@@ -150,7 +199,9 @@ class _profileState extends State<profile> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AddReviewPage()),
+                              builder: (context) => OrderReviewPage(
+                                    shipping: shipping,
+                                  )),
                         );
                       },
                       child: Container(
@@ -258,76 +309,76 @@ class _profileState extends State<profile> {
                   height: 5,
                   color: Color(0xDDF1EBEB),
                 ),
-                Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.white),
-                      borderRadius: BorderRadius.circular(0),
-                    ),
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        height: 55,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('  ADDRESS BOOK    ',
-                                  style: TextStyle(
-                                    color: kourcolor1,
-                                    fontSize: 20,
-                                  )),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 30,
-                              )
-                            ]),
-                      ),
-                    )),
+                // Container(
+                //     decoration: BoxDecoration(
+                //       border: Border.all(width: 1, color: Colors.white),
+                //       borderRadius: BorderRadius.circular(0),
+                //     ),
+                //     child: GestureDetector(
+                //       onTap: () {},
+                //       child: Container(
+                //         height: 55,
+                //         width: double.infinity,
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           borderRadius: BorderRadius.circular(20),
+                //         ),
+                //         padding: const EdgeInsets.symmetric(vertical: 5),
+                //         child: Row(
+                //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //             children: [
+                //               Text('  ADDRESS BOOK    ',
+                //                   style: TextStyle(
+                //                     color: kourcolor1,
+                //                     fontSize: 20,
+                //                   )),
+                //               Icon(
+                //                 Icons.chevron_right,
+                //                 size: 30,
+                //               )
+                //             ]),
+                //       ),
+                //     )),
                 Container(
                   width: double.infinity,
                   height: 5,
                   color: Color(0xDDF1EBEB),
                 ),
-                Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.white),
-                      borderRadius: BorderRadius.circular(0),
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Cart()),
-                        );
-                      },
-                      child: Container(
-                        height: 55,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('  ACCOUNT DELETION    ',
-                                  style: TextStyle(
-                                    color: kourcolor1,
-                                    fontSize: 20,
-                                  )),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 30,
-                              )
-                            ]),
-                      ),
-                    )),
+                // Container(
+                //     decoration: BoxDecoration(
+                //       border: Border.all(width: 1, color: Colors.white),
+                //       borderRadius: BorderRadius.circular(0),
+                //     ),
+                //     child: GestureDetector(
+                //       onTap: () {
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(builder: (context) => Cart()),
+                //         );
+                //       },
+                //       child: Container(
+                //         height: 55,
+                //         width: double.infinity,
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           borderRadius: BorderRadius.circular(20),
+                //         ),
+                //         padding: const EdgeInsets.symmetric(vertical: 5),
+                //         child: Row(
+                //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //             children: [
+                //               Text('  ACCOUNT DELETION    ',
+                //                   style: TextStyle(
+                //                     color: kourcolor1,
+                //                     fontSize: 20,
+                //                   )),
+                //               Icon(
+                //                 Icons.chevron_right,
+                //                 size: 30,
+                //               )
+                //             ]),
+                //       ),
+                //     )),
                 Container(
                   width: double.infinity,
                   height: 5,

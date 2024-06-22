@@ -47,7 +47,7 @@ class UserPreferences {
     return _preferences.getString('username');
   }
 
-   static Future setimageUrl(String imageUrl) async {
+  static Future setimageUrl(String imageUrl) async {
     await _preferences.setString('imageUrl', imageUrl);
   }
 
@@ -67,7 +67,7 @@ class UserPreferences {
     return _preferences.getString('id');
   }
 
-    static Future setUserPN(String phoneNumber) async {
+  static Future setUserPN(String phoneNumber) async {
     await _preferences.setString('phoneNumber', phoneNumber);
   }
 
@@ -128,19 +128,20 @@ class UserPreferences {
     }
   }
 
-    static Future getPN(String email) async {
+  static Future getPN(String email) async {
     //String? email = getEmail();
     final ipAddress = await getLocalIPv4Address();
     if (email != null) {
       try {
-        final response =
-            await http.get(Uri.parse('http://$ipAddress:5000/getPhoneNumber/$email'));
+        final response = await http
+            .get(Uri.parse('http://$ipAddress:5000/getPhoneNumber/$email'));
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           var data = jsonDecode(response.body);
           int? phoneNumber = data['phoneNumber'];
           if (phoneNumber != null) {
-            setUserPN(phoneNumber.toString()); // Save the fetched name in SharedPreferences
+            setUserPN(phoneNumber
+                .toString()); // Save the fetched name in SharedPreferences
             return phoneNumber;
           }
         } else {
@@ -151,6 +152,20 @@ class UserPreferences {
       }
     } else {
       print('Email is not set');
+    }
+  }
+
+  static Future<String> getUserIdByEmail(String email) async {
+    final ipAddress = await getLocalIPv4Address();
+    final url =
+        Uri.parse('http://$ipAddress:5000/getUserIdByEmail?email=$email');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final responseBody = json.decode(response.body);
+      return responseBody['userId'];
+    } else {
+      throw Exception('Failed to load user ID');
     }
   }
 }

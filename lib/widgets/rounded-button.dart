@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:project1/AdminScreens/homepage.dart';
+import 'package:project1/AdminScreens/admin_page.dart';
 import 'package:project1/ipaddress.dart';
-import 'package:project1/screens/admin_page.dart';
+//import 'package:project1/screens/admin_page.dart';
 import 'package:project1/screens/home_page.dart';
 import 'package:project1/screens/login1.dart';
 import 'package:project1/screens/ring_on_hand.dart';
@@ -122,14 +124,14 @@ class _RoundedButtonState extends State<RoundedButton> {
     return null;
   }
 
-    String? _validatePhoneNumber(String? value) {
+  String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your phone number';
     }
     // Regular Expression for email validation
     if (!RegExp(r'^\+?[\d\s]{10,15}$').hasMatch(value)) {
-    return 'Please enter a valid phone number';
-  }
+      return 'Please enter a valid phone number';
+    }
     return null;
   }
 

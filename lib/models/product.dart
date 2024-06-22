@@ -195,5 +195,80 @@ class Product {
     }
   }
 
-  
+static Future<List<Product>> fetchNewestItems(String category) async {
+    print("Inside fetch newest items function");
+    final ipAddress = await getLocalIPv4Address(); 
+    final response =
+        await http.get(Uri.parse('http://$ipAddress:5000/fetchNewestItems/$category'));
+
+    print('Raw JSON response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print('Products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception('Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Product>> fetchByHighestPriceItems(String category) async {
+    print("Inside fetch highest items function");
+    final ipAddress = await getLocalIPv4Address(); 
+    final response =
+        await http.get(Uri.parse('http://$ipAddress:5000/fetchItemsByHighestPrice/$category'));
+
+    print('Raw JSON response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print('Products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception('Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Product>> fetchByLowestPriceItems(String category) async {
+    print("Inside fetch lowest items function");
+    final ipAddress = await getLocalIPv4Address(); 
+    final response =
+        await http.get(Uri.parse('http://$ipAddress:5000/fetchItemsByLowestPrice/$category'));
+
+    print('Raw JSON response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<Product> products = (json.decode(response.body) as List)
+          .map((data) => Product.fromJson(data))
+          .toList();
+
+      products.forEach((product) {
+        print('Product ID: ${product.id}');
+      });
+
+      print('Products loaded successfully, Status code: ${response.statusCode}');
+      return products;
+    } else {
+      print('Failed to load products, Status code: ${response.statusCode}');
+      throw Exception('Failed to load products, Status code: ${response.statusCode}');
+    }
+  }
+
 }
+

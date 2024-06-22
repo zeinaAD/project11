@@ -24,12 +24,28 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   String orderStatus = "Processing";
   late Order order;
   late Future<Order> futureOrder;
-  // futureOrder = fetchOrder("666570be2bfa942ff8aca91e");
+
   @override
   void initState() {
     super.initState();
-    futureOrder = fetchOrder(
-        UserPreferences.getUserID()); // Make sure to pass the correct ID
+    futureOrder = _initializeOrder();
+  }
+
+  Future<Order> _initializeOrder() async {
+    String? email = await UserPreferences.getEmail();
+    if (email != null) {
+      String userId = await UserPreferences.getUserIdByEmail(email);
+      try {
+        return fetchOrder(userId);
+      } catch (e) {
+        // Handle error, possibly show a message to the user
+        print('Failed to fetch order info: $e');
+        throw e; // Re-throw the error so the Future completes with an error
+      }
+    } else {
+      // Handle case when email is null, perhaps navigate to login or show an error
+      throw Exception('Email is null');
+    }
   }
 
   Widget build(BuildContext context) {
@@ -146,24 +162,17 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  static Future<Order> fetchOrder(String? userid) async {
-    // id = "66657281cc66b0be50ff9f80";
-    // final response;
-
-    final ipAddress =
-        await getLocalIPv4Address(); // Ensure this function is correctly implemented
+ static Future<Order> fetchOrder(String userId) async {
+    final ipAddress = await getLocalIPv4Address(); // Ensure this function is correctly implemented
     try {
-      final response =
-          await http.get(Uri.parse('http://$ipAddress:5000/order/$userid'));
-      print('Response body in fetchOrder : ${response.body}');
+      final response = await http.get(Uri.parse('http://$ipAddress:5000/order/$userId'));
+      print('Response body in fetchOrder: ${response.body}');
       if (response.statusCode == 200) {
         var decoded = json.decode(response.body);
-        // print('Decoded JSON: $decoded');
         return Order.fromJson(decoded);
       } else {
         print('Failed to load order, Status code: ${response.statusCode}');
-        throw Exception(
-            'Failed to load order, Status code: ${response.statusCode}');
+        throw Exception('Failed to load order, Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error making request: $e');

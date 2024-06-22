@@ -42,6 +42,12 @@ class _RingPageState extends State<RingPage> {
           .fetchBestSellers(); // Use fetchBestSellers when category is 'all'
     } else if (widget.category == 'new') {
       futureProducts = Product.fetchNewArrivals();
+    } else if (widget.category == 'newest') {
+      futureProducts = Product.fetchNewestItems("Ring");
+    } else if (widget.category == 'highest') {
+      futureProducts = Product.fetchByHighestPriceItems("Ring");
+    } else if (widget.category == 'lowest') {
+      futureProducts = Product.fetchByLowestPriceItems("Ring");
     } else {
       futureProducts = Product.fetchProducts(
           widget.category); // Use fetchProducts for other categories
@@ -165,8 +171,8 @@ class _RingPageState extends State<RingPage> {
                     mainAxisExtent: 325,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        ProductCard(product: snapshot.data![index], isDiamond: true),
+                    (context, index) => ProductCard(
+                        product: snapshot.data![index], isDiamond: true),
                     childCount: snapshot.data!.length,
                   ),
                 );
