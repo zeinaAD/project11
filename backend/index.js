@@ -166,6 +166,45 @@ app.delete('/deleteCartItem/:userId/:productId', async (req, res) => {
 });
 
 
+//update quantity in cart for a specific item 
+app.put('/updateCartItem/:userId/:productId', async (req, res) => {
+  const { userId, productId } = req.params;
+  const { quantity } = req.body;
+
+  if (!quantity) {
+    return res.status(400).send({ message: 'Missing quantity' });
+  }
+
+  try {
+    // Find the cart for the user
+    const cart = await Cart.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+
+    if (cart) {
+      // Find the item index in the cart's items array
+      const itemIndex = cart.items.findIndex(
+        item => item.productId.toString() === productId
+      );
+
+      if (itemIndex > -1) {
+        // Item exists in cart, update the quantity
+        cart.items[itemIndex].quantity = quantity;
+
+        // Save the updated cart
+        await cart.save();
+
+        res.send({ message: 'Cart item updated successfully' });
+      } else {
+        return res.status(404).send({ message: 'Cart item not found' });
+      }
+    } else {
+      return res.status(404).send({ message: 'Cart not found' });
+    }
+  } catch (error) {
+    console.error('Error updating cart item:', error);
+    res.status(500).send({ message: 'Failed to update cart item', error: error.message });
+  }
+});
+
 
 const DYRItem = require('./models/DYRitem');
 

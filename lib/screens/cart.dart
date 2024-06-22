@@ -26,8 +26,6 @@ class _CartState extends State<Cart> {
     super.initState();
     futureCartItems = Future.value([]);
     _initializeWishlist();
-    //futureCartItems = fetchCartItem(UserPreferences.getUserID());
-    //futureCartItems.then((_) => _calculateTotalPrice());
   }
 
   void _initializeWishlist() async {
@@ -62,9 +60,6 @@ class _CartState extends State<Cart> {
         setState(() {
           totalPrice = (jsonResponse['totalPrice'] as num).toDouble();
         });
-
-        // return jsonResponse['totalPrice']
-        //     .toDouble(); // Convert the total price to double
       } else {
         throw Exception(
             'Failed to load total price, Status code: ${response.statusCode}');
@@ -74,39 +69,9 @@ class _CartState extends State<Cart> {
       throw Exception('An error occurred: $e');
     }
   }
-  // void _calculateTotalPrice() async {
-  //   try {
-  //     List<dynamic> cartItemsJson = await fetchCartItem(userID);
-  //     cartItems = cartItemsJson.map((itemJson) {
-  //       int parsedPrice =
-  //           int.tryParse(itemJson['productPrice'].toString()) ?? 0;
-  //       int parsedQuantity =
-  //           int.tryParse(itemJson['productQuantity'].toString()) ?? 0;
-  //       return CartItem(
-  //         name: itemJson['productName'],
-  //         price: parsedPrice,
-  //         quantity: parsedQuantity,
-  //         productId: itemJson['productId'],
-  //       );
-  //     }).toList();
-
-  //     double totalPrice = cartItems.fold(0.0,
-  //         (previousValue, item) => previousValue + item.price * item.quantity);
-
-  //     setState(() {
-  //       _totalPrice = totalPrice;
-  //     });
-  //   } catch (e) {
-  //     print('Error calculating total price: $e');
-  //     setState(() {
-  //       _totalPrice = 0.0; // Reset or handle error state
-  //     });
-  //   }
-  // }
 
   late Future<List<dynamic>> futureCartItems;
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,8 +125,16 @@ class _CartState extends State<Cart> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () => _updateQuantity(item['productId'], item['productQuantity'] - 1),
+                      ),
                       Text(
-                          '\$${(item['productPrice'] * item['productQuantity']).toString()}'), // Product price
+                          '${item['productQuantity']}'), // Display the quantity
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => _updateQuantity(item['productId'], item['productQuantity'] + 1),
+                      ),
                       IconButton(
                         icon: Icon(Icons.delete, color: Colors.red),
                         onPressed: () => _deleteCartItem(item['productId']),
@@ -265,6 +238,37 @@ class _CartState extends State<Cart> {
     } catch (e) {
       print('Error deleting cart item: $e');
       throw Exception('Failed to delete cart item: $e');
+    }
+  }
+
+  void _updateQuantity(String productId, int newQuantity) async {
+    if (newQuantity <= 0) {
+      // If the new quantity is 0 or less, delete the item
+      _deleteCartItem(productId);
+    } else {
+      final ipAddress = await getLocalIPv4Address();
+      userID = UserPreferences.getUserID()!;
+      try {
+        final response = await http.put(
+          Uri.parse('http://$ipAddress:5000/updateCartItem/$userID/$productId'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'quantity': newQuantity}),
+        );
+
+        if (response.statusCode == 200) {
+          // Update the UI to reflect the new quantity
+          setState(() {
+            futureCartItems = fetchCartItem(userID);
+            fetchTotalPrice(userID);
+          });
+        } else {
+          throw Exception(
+              'Failed to update cart item quantity, Status code: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error updating cart item quantity: $e');
+        throw Exception('Failed to update cart item quantity: $e');
+      }
     }
   }
 }
