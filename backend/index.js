@@ -124,6 +124,48 @@ app.get('/fetchWishlistItems/:id', async (req, res) => {
   }
 });
 
+// delete from cart 
+
+app.delete('/deleteCartItem/:userId/:productId', async (req, res) => {
+  const { userId, productId } = req.params;
+  console.log(req.params);
+
+  try {
+    // Find the cart for the user
+    const cart = await Cart.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+
+    if (cart) {
+      // Find the item index in the cart's items array
+      const itemIndex = cart.items.findIndex(
+        item => item.productId.toString() === productId 
+      );
+
+      if (itemIndex > -1) {
+        // Item exists in cart, remove it
+        cart.items.splice(itemIndex, 1);
+
+        // If the cart is empty after removal, remove the cart document
+        if (cart.items.length === 0) {
+          await Cart.deleteOne({ userId: new mongoose.Types.ObjectId(userId) });
+        } else {
+          // Otherwise, save the updated cart
+          await cart.save();
+        }
+
+        res.send({ message: 'Cart item deleted successfully' });
+      } else {
+        return res.status(404).send({ message: 'Cart item not found' });
+      }
+    } else {
+      return res.status(404).send({ message: 'Cart not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+    res.status(500).send({ message: 'Failed to delete cart item', error: error.message });
+  }
+});
+
+
 
 const DYRItem = require('./models/DYRitem');
 

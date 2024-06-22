@@ -157,9 +157,17 @@ class _CartState extends State<Cart> {
                       ],
                     ),
                   ),
-                  trailing: Text(
-                      '\$${(item['productPrice'] * item['productQuantity']).toString()}'), // Product price
-                      
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                          '\$${(item['productPrice'] * item['productQuantity']).toString()}'), // Product price
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteCartItem(item['productId']),
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -233,6 +241,30 @@ class _CartState extends State<Cart> {
     } catch (e) {
       print('Error fetching cart items: $e');
       throw Exception('Failed to load cart products: $e');
+    }
+  }
+
+  void _deleteCartItem(String productId) async {
+    final ipAddress = await getLocalIPv4Address();
+    userID = UserPreferences.getUserID()!;
+    try {
+      final response = await http.delete(
+        Uri.parse('http://$ipAddress:5000/deleteCartItem/$userID/$productId'),
+      );
+
+      if (response.statusCode == 200) {
+        // Update the UI to remove the deleted item
+        setState(() {
+          futureCartItems = fetchCartItem(userID);
+          fetchTotalPrice(userID);
+        });
+      } else {
+        throw Exception(
+            'Failed to delete cart item, Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error deleting cart item: $e');
+      throw Exception('Failed to delete cart item: $e');
     }
   }
 }
